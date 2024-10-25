@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "383256755764",
+    "project_id": "app-testers-6b94a",
+    "storage_bucket": "app-testers-6b94a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:383256755764:android:a6840bd87961111e7d1461",
+        "android_client_info": {
+          "package_name": "com.summitcodeworks.apptesters"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmIonAG5rlMmvz_s6B1CkiaRauHJkQCNQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

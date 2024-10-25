@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Common color names for the app (dark mode) -->
+    <color name="colorPrimary">#D0BCFF</color>
+    <color name="colorPrimaryContainer">#4F378B</color>
+    <color name="colorSecondary">#CCC2DC</color>
+    <color name="colorOnPrimary">#381E72</color>
+    <color name="colorBackground">#1C1B1E</color>
+    <color name="colorSurface">#1C1B1E</color>
+    <color name="colorText">#FFFFFF</color>
+    <color name="colorWhite">#FFFFFF</color> <!-- White for dark mode -->
+</resources>

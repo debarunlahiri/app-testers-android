@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/custom_google_button_background.xml -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Shadow Layer -->
+    <item>
+        <shape>
+            <corners android:radius="30dp"/>
+            <solid android:color="#d3d3d3"/>
+            <padding
+                android:left="2dp"
+                android:top="2dp"
+                android:right="2dp"
+                android:bottom="2dp"/>
+        </shape>
+    </item>
+
+    <!-- Main Button Layer -->
+    <item>
+        <shape>
+            <corners android:radius="30dp"/>
+            <gradient
+                android:startColor="#4285F4"
+                android:endColor="#0F9D58"
+                android:angle="45"/>
+            <stroke
+                android:width="2dp"
+                android:color="#FFFFFF"/>
+        </shape>
+    </item>
+
+</layer-list>
