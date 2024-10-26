@@ -8,7 +8,9 @@ data class UserAppRequest(
     @SerializedName("app_web_link") private var _appWebLink: String = "",
     @SerializedName("app_app_link") private var _appLink: String = "",
     @SerializedName("app_desc") private var _appDescription: String = "",
-    @SerializedName("app_logo") private var _appLogo: String = ""
+    @SerializedName("app_logo") private var _appLogo: String = "",
+    @SerializedName("app_created_by") private var _userCreatedBy: String = "",
+    @SerializedName("app_credit") private var _appCredit: String = ""
 ) {
     var appName: String
         get() = _appName
@@ -44,6 +46,18 @@ data class UserAppRequest(
         get() = _appLogo
         set(value) {
             _appLogo = value
+        }
+
+    var userCreatedBy: String
+        get() = _userCreatedBy
+        set(value) {
+            _userCreatedBy = value
+        }
+
+    var appCredit: String
+        get() = _appCredit
+        set(value) {
+            _appCredit = value
         }
 }
 

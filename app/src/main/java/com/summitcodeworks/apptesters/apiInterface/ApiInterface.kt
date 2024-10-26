@@ -11,14 +11,16 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiInterface {
 
     @POST("register-user")
     fun registerUser(@Body userRequest: UserRequest): Call<ResponseHandler>
 
-    @GET("app-lists")
-    fun getAppList(): Call<UserApps>
+    @GET("/app-lists")
+    fun getAppList(@Query("page") page: Int, @Query("per_page") perPage: Int): Call<UserApps>
+
 
     @GET("app-detail/{appId}")
     fun getAppDetails(@Path("appId") appId: Int): Call<AppDetails>
@@ -27,8 +29,8 @@ interface ApiInterface {
     @POST("create-app")
     fun createApp(@Body userAppRequest: UserAppRequest): Call<ResponseHandler>
 
-    @GET("login")
-    fun loginUser(): Call<UserDetails>
+    @POST("authenticate")
+    fun authenticateUser(): Call<UserDetails>
 
 
 }

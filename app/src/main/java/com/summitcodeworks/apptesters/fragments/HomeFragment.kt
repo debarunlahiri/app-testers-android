@@ -9,7 +9,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.summitcodeworks.apptesters.activities.CreditsActivity
 import com.summitcodeworks.apptesters.activities.DetailActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.adapter.HomeAdapter
@@ -17,6 +19,9 @@ import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.databinding.FragmentHomeBinding
 import com.summitcodeworks.apptesters.models.userApps.UserApps
 import com.summitcodeworks.apptesters.models.userApps.UserAppsResponse
+import com.summitcodeworks.apptesters.models.userDetails.UserDetails
+import com.summitcodeworks.apptesters.utils.CommonUtils.Companion.applyBoldStyle
+import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -45,6 +50,9 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
     private var userAppsList: ArrayList<UserAppsResponse> = ArrayList<UserAppsResponse>()
     private lateinit var linearLayoutManager: LinearLayoutManager
 
+    private var currentPage = 1
+    private val itemsPerPage = 10
+    private var isLoading = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,27 +84,54 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
         viewBinding.rvHome.isNestedScrollingEnabled = false
 
         viewBinding.srlHome.setOnRefreshListener {
-            fetchAppList()
+            fetchAppList(currentPage, itemsPerPage)
             viewBinding.srlHome.isRefreshing = false
         }
 
-        fetchAppList()
+
+        fetchAppList(currentPage, itemsPerPage)
+
+        viewBinding.cvHomeCredits.setOnClickListener {
+            val creditsIntent = Intent(mContext, CreditsActivity::class.java)
+            startActivity(creditsIntent)
+        }
+
+        setupScrollListener()
     }
 
-    private fun fetchAppList() {
+    private fun setupScrollListener() {
+        viewBinding.nsvHome.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { _, _, scrollY, _, _ ->
+            if (!isLoading && scrollY == (viewBinding.nsvHome.getChildAt(0).measuredHeight - viewBinding.nsvHome.height)) {
+                // Load more data
+                currentPage++
+                fetchAppListMore(currentPage, itemsPerPage)
+            }
+        })
+    }
+
+    private fun fetchAppList(page: Int, perPage: Int) {
+        isLoading = true
+        authenticateUser()
         userAppsList.clear()
         homeAdapter.setUserAppList(userAppsList)
         homeAdapter.notifyDataSetChanged()
-        RetrofitClient.apiInterface.getAppList().enqueue(object : Callback<UserApps> {
+
+        RetrofitClient.apiInterface.getAppList(page, perPage).enqueue(object : Callback<UserApps> {
             override fun onResponse(call: Call<UserApps>, response: Response<UserApps>) {
+                isLoading = false
                 if (response.isSuccessful) {
-                    if (response.body()?.header?.responseCode  == 200) {
-                        userAppsList.addAll(response.body()!!.response)
-                        homeAdapter.setUserAppList(userAppsList)
+                    if (response.body()?.header?.responseCode == 200) {
+                        response.body()?.response?.let { apps ->
+                            userAppsList.addAll(apps)
+                            homeAdapter.setUserAppList(userAppsList)
+                            homeAdapter.notifyDataSetChanged()
+                        }
                     }
                 }
             }
+
             override fun onFailure(call: Call<UserApps>, t: Throwable) {
+                isLoading = false
                 Log.e(TAG, "Network request failed", t)
                 if (t is IOException) {
                     Toast.makeText(requireContext(), "Network error. Please try again.", Toast.LENGTH_SHORT).show()
@@ -104,6 +139,68 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
                     Toast.makeText(requireContext(), "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
                 }
             }
+        })
+    }
+
+    private fun fetchAppListMore(page: Int, perPage: Int) {
+        isLoading = true
+        RetrofitClient.apiInterface.getAppList(page, perPage).enqueue(object : Callback<UserApps> {
+            override fun onResponse(call: Call<UserApps>, response: Response<UserApps>) {
+                isLoading = false
+                if (response.isSuccessful) {
+                    if (response.body()?.header?.responseCode == 200) {
+                        response.body()?.response?.let { apps ->
+                            userAppsList.addAll(apps)
+                            homeAdapter.setUserAppList(userAppsList)
+                            homeAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<UserApps>, t: Throwable) {
+                isLoading = false
+                Log.e(TAG, "Network request failed", t)
+                if (t is IOException) {
+                    Toast.makeText(requireContext(), "Network error. Please try again.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        })
+    }
+
+
+
+    private fun authenticateUser() {
+        RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
+            override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
+                if (response.isSuccessful) {
+                    val userDetails = response.body()?.response
+                    if (userDetails != null) {
+                        SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
+                        val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
+                        viewBinding.tvUserCredits.text = SharedPrefsManager.getUserDetails(mContext).userCredits.toString()
+
+                    } else {
+                        Log.e(TAG, "User details are null")
+                        Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
+                    Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
+                }
+            }
+
+            override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
+                Log.e(TAG, "Network request failed", p1)
+                if (p1 is IOException) {
+                    Toast.makeText(requireContext(), "Network error. Please try again.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(requireContext(), "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
+                }
+            }
+
         })
     }
 

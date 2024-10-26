@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.MenuItem
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -17,14 +18,17 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.firebase.auth.FirebaseAuth
+import com.google.gson.Gson
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.databinding.ActivityMainBinding
 import com.summitcodeworks.apptesters.activities.LoginActivity // Import your LoginActivity
 import com.summitcodeworks.apptesters.adapter.ViewPagerAdapter
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 
 class MainActivity : AppCompatActivity() {
 
+    private val TAG: String? = MainActivity::class.java.simpleName
     private lateinit var mContext: Context
 
     private lateinit var viewBinding: ActivityMainBinding
@@ -82,6 +86,8 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+
+        Log.i(TAG, "onCreate:getUserDetails " + Gson().toJson(SharedPrefsManager.getUserDetails(mContext)))
 
     }
 

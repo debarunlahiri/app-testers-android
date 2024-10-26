@@ -1,5 +1,9 @@
 package com.summitcodeworks.apptesters.utils
 
+import android.graphics.Typeface
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.StyleSpan
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -43,5 +47,18 @@ class CommonUtils {
                 "Invalid Date"
             }
         }
+
+        fun applyBoldStyle(boldPart: String, fullText: String): SpannableString {
+            val spannableString = SpannableString(fullText)
+            val start = fullText.indexOf(boldPart)
+            val end = start + boldPart.length
+            spannableString.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            return spannableString
+        }
+
+
+
     }
+
+
 }

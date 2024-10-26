@@ -179,14 +179,9 @@ class LoginActivity : AppCompatActivity() {
                         if (response.body()?.header?.responseCode == 201) {
                             sendToMain()
                             Log.d(TAG, "User registered successfully: ${response.body()}")
-                        } else if (response.body()?.header?.responseCode == 409) {
-                            if (response.body()?.header?.responseCode  == 409) {
-                                loginUser(user)
-                            }
-                        } else {
-                            Log.e(TAG, "Registration failed with code: ${response.code()} - ${response.message()}")
-                            Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
                         }
+                    } else if (response.code() == 409) {
+                        authenticateUser()
                     } else {
                         Log.e(TAG, "Registration failed with code: ${response.code()} - ${response.message()}")
                         Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
@@ -205,8 +200,8 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun loginUser(user: FirebaseUser) {
-        RetrofitClient.apiInterface.loginUser().enqueue(object : Callback<UserDetails> {
+    private fun authenticateUser() {
+        RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
             override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
                 if (response.isSuccessful) {
                     val userDetails = response.body()?.response

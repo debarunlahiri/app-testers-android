@@ -105,7 +105,7 @@
                 android:textColor="#ABABAB" />
 
             <TextView
-                android:id="@+id/textView8"
+                android:id="@+id/tvPostAppAvailableCredits"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
@@ -196,13 +196,27 @@
                     android:singleLine="false" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <Button
-                android:id="@+id/bPostApp"
+
+
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_margin="16dp"
-                android:text="Post App"
-                app:cornerRadius="5dp" />
+                android:orientation="vertical">
+
+                <ProgressBar
+                    android:id="@+id/pbPostAppProgressBar"
+                    style="?android:attr/progressBarStyle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+                <Button
+                    android:id="@+id/bPostApp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Post App"
+                    app:cornerRadius="5dp" />
+            </LinearLayout>
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
