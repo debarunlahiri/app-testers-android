@@ -34,6 +34,7 @@ class HomeAdapter(
             binding.tvAppName.text = userApp.appName // Example: assuming you have a TextView for app name
             binding.tvAppDevName.text = userApp.appDevName // Example: assuming you have a TextView for dev name
             binding.tvAppCredits.text = "${userApp.appCredit} credits"
+            binding.tvAppDesc.text = userApp.appDesc
             // Check if the logo URL ends with .svg
             if (userApp.appLogo.endsWith(".svg")) {
                 loadSvg(userApp.appLogo)

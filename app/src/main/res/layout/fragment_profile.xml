@@ -17,55 +17,66 @@
             android:orientation="vertical"
             tools:context=".ProfileActivity">
 
-            <!-- Header Image -->
-            <ImageView
-                android:id="@+id/headerImage"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/login_bg" />
 
-            <!-- Profile Information Section -->
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp"
-                android:gravity="center_horizontal">
+                android:layout_height="250dp">
 
-                <!-- Profile Image (Circular) -->
-                <io.getstream.avatarview.AvatarView
-                    android:id="@+id/avProfileImage"
-                    android:layout_width="110dp"
-                    android:layout_height="110dp"
+                <ImageView
+                    android:id="@+id/headerImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:scaleType="centerCrop"
-                    app:avatarViewBorderColor="@color/grey"
-                    app:avatarViewBorderWidth="3dp"
-                    app:avatarViewInitialsTextStyle="bold"
-                    app:avatarViewShape="circle" />
+                    android:src="@drawable/login_bg" />
 
-                <!-- Profile Name -->
-                <TextView
-                    android:id="@+id/tvProfileName"
-                    android:layout_width="wrap_content"
+                <View
+                    android:id="@+id/view"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#26000000" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textStyle="bold"
-                    android:textSize="20sp"
-                    android:layout_marginTop="8dp"
-                    android:gravity="center" />
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
 
-                <!-- Profile Email -->
-                <TextView
-                    android:id="@+id/tvProfileEmail"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@color/colorSecondary"
-                    android:layout_marginTop="4dp"
-                    android:gravity="center" />
-            </LinearLayout>
+                    <io.getstream.avatarview.AvatarView
+                        android:id="@+id/avProfileImage"
+                        android:layout_width="110dp"
+                        android:layout_height="110dp"
+                        android:scaleType="centerCrop"
+                        android:layout_gravity="center"
+                        app:avatarViewBorderColor="@color/grey"
+                        app:avatarViewBorderWidth="3dp"
+                        app:avatarViewInitialsTextStyle="bold"
+                        app:avatarViewShape="circle" />
 
-            <!-- Divider -->
+                    <TextView
+                        android:id="@+id/tvProfileName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:gravity="center"
+                        android:textAlignment="center"
+                        android:textColor="@color/colorWhite"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvProfileEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:gravity="center"
+                        android:textAlignment="center"
+                        android:textColor="@color/grey"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+
+            </FrameLayout>
+
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -105,7 +116,6 @@
 <!--                    android:layout_marginStart="16dp" />-->
 <!--            </LinearLayout>-->
 
-            <!-- App Settings Section -->
             <TextView
                 android:id="@+id/appSettingsLabel"
                 android:layout_width="match_parent"
@@ -115,11 +125,13 @@
                 android:textStyle="bold"
                 android:textSize="16sp" />
 
-            <!-- Your Apps Button -->
             <LinearLayout
+                android:id="@+id/llYourApps"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:foreground="?selectableItemBackground"
+                android:clickable="true"
                 android:padding="16dp"
                 android:gravity="center_vertical">
 
@@ -127,22 +139,25 @@
                     android:id="@+id/yourAppsIcon"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_playstore" />
+                    android:src="@drawable/ic_app" />
 
                 <TextView
                     android:id="@+id/yourAppsText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Your Apps"
+                    android:text="My Apps"
                     android:textSize="16sp"
                     android:layout_marginStart="16dp" />
             </LinearLayout>
 
             <!-- Settings Button -->
             <LinearLayout
+                android:id="@+id/llSettings"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:foreground="?selectableItemBackground"
+                android:clickable="true"
                 android:padding="16dp"
                 android:gravity="center_vertical">
 

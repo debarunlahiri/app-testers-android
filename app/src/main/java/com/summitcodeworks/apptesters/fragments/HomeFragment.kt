@@ -3,6 +3,8 @@ package com.summitcodeworks.apptesters.fragments
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -20,7 +22,7 @@ import com.summitcodeworks.apptesters.databinding.FragmentHomeBinding
 import com.summitcodeworks.apptesters.models.userApps.UserApps
 import com.summitcodeworks.apptesters.models.userApps.UserAppsResponse
 import com.summitcodeworks.apptesters.models.userDetails.UserDetails
-import com.summitcodeworks.apptesters.utils.CommonUtils.Companion.applyBoldStyle
+import com.summitcodeworks.apptesters.utils.CommonUtils
 import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import retrofit2.Call
 import retrofit2.Callback
@@ -76,6 +78,8 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
 
         mContext = requireContext()
 
+        viewBinding.ibSearchClear.visibility = View.INVISIBLE
+
         homeAdapter = HomeAdapter(mContext, userAppsList, this@HomeFragment)
         linearLayoutManager = LinearLayoutManager(mContext)
         viewBinding.rvHome.layoutManager = linearLayoutManager
@@ -84,6 +88,10 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
         viewBinding.rvHome.isNestedScrollingEnabled = false
 
         viewBinding.srlHome.setOnRefreshListener {
+            currentPage = 1
+            userAppsList.clear()
+            homeAdapter.setUserAppList(userAppsList)
+            homeAdapter.notifyDataSetChanged()
             fetchAppList(currentPage, itemsPerPage)
             viewBinding.srlHome.isRefreshing = false
         }
@@ -96,7 +104,58 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
             startActivity(creditsIntent)
         }
 
+        viewBinding.etHomeSearch.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+            }
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            }
+
+            override fun afterTextChanged(p0: Editable?) {
+                val searchText = p0.toString().trim()
+                if (searchText.isNotEmpty()) {
+                    searchApps(searchText)
+                }
+                if (searchText.length >= 3) {
+                    viewBinding.ibSearchClear.visibility = View.VISIBLE
+                } else {
+                    viewBinding.ibSearchClear.visibility = View.INVISIBLE
+                }
+            }
+
+        })
+
+        viewBinding.ibSearchClear.setOnClickListener {
+            viewBinding.etHomeSearch.text.clear()
+            fetchAppList(currentPage, itemsPerPage)
+        }
+
         setupScrollListener()
+    }
+
+    private fun searchApps(searchText: String) {
+        RetrofitClient.apiInterface.searchApps(searchText).enqueue(object : Callback<UserApps> {
+            override fun onResponse(p0: Call<UserApps>, p1: Response<UserApps>) {
+                if (p1.isSuccessful) {
+                    if (p1.body()?.header?.responseCode == 200) {
+                        val searchResponse = p1.body()?.response
+                        if (searchResponse != null) {
+                            userAppsList.clear()
+                            userAppsList.addAll(searchResponse)
+                            homeAdapter.setUserAppList(userAppsList)
+                            homeAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+            }
+
+            override fun onFailure(p0: Call<UserApps>, p1: Throwable) {
+                CommonUtils.apiRequestFailedToast(mContext, p1)
+            }
+
+
+        })
     }
 
     private fun setupScrollListener() {
@@ -160,12 +219,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
 
             override fun onFailure(call: Call<UserApps>, t: Throwable) {
                 isLoading = false
-                Log.e(TAG, "Network request failed", t)
-                if (t is IOException) {
-                    Toast.makeText(requireContext(), "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                }
+                CommonUtils.apiRequestFailedToast(mContext, t)
             }
         })
     }
@@ -193,15 +247,16 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
             }
 
             override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
-                Log.e(TAG, "Network request failed", p1)
-                if (p1 is IOException) {
-                    Toast.makeText(requireContext(), "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                }
+                CommonUtils.apiRequestFailedToast(mContext, p1)
             }
 
         })
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        authenticateUser()
     }
 
     companion object {

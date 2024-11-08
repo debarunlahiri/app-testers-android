@@ -5,7 +5,13 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ClickableSpan
+import android.text.style.ForegroundColorSpan
+import android.text.style.UnderlineSpan
 import android.util.Log
+import android.util.Patterns
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -20,16 +26,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FirebaseUser
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.databinding.ActivityRegisterBinding
 import com.summitcodeworks.apptesters.models.UserRequest
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
+import com.summitcodeworks.apptesters.utils.CommonUtils
 import jp.wasabeef.glide.transformations.BlurTransformation
-import okhttp3.*
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import java.io.IOException
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -57,20 +60,17 @@ class RegisterActivity : AppCompatActivity() {
                 View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
         }
 
-        // For Android 11 and higher
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val controller = ViewCompat.getWindowInsetsController(window.decorView)
             controller?.isAppearanceLightStatusBars = false // White text and icons
         }
 
-        // Load the blurred image with Glide
         Glide.with(this)
-            .load(R.drawable.login_bg) // Your drawable resource
+            .load(R.drawable.login_bg)
             .centerCrop()
             .apply(RequestOptions.bitmapTransform(BlurTransformation(25, 5)))
             .into(viewBinding.imageView)
 
-        // Set the click listener for the login button
         viewBinding.bLogin.setOnClickListener {
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
@@ -78,25 +78,77 @@ class RegisterActivity : AppCompatActivity() {
 
         // Set the click listener for the register button
         viewBinding.bRegister.setOnClickListener {
-            val email = viewBinding.tieRegisterEmail.text.toString()
+            val email = viewBinding.tieRegisterEmail.text.toString().trim()
             val password = viewBinding.tieRegisterPassword.text.toString()
-            registerWithEmail(email, password)
+            val name = viewBinding.tieRegisterName.text.toString().trim()
+
+            if (isValidEmail(email) && isValidPassword(password) && name.isNotEmpty()) {
+                registerWithEmail(email, password, name)
+            } else {
+                when {
+                    !isValidEmail(email) -> Toast.makeText(mContext, "Please enter a valid email", Toast.LENGTH_SHORT).show()
+                    !isValidPassword(password) -> Toast.makeText(mContext, "Password must be at least 8 characters long, and include uppercase, lowercase, numbers, and special characters", Toast.LENGTH_LONG).show()
+                    name.isEmpty() -> Toast.makeText(mContext, "Please enter your name", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
 
         // Google Sign-In
         viewBinding.bGoogleSignUp.setOnClickListener {
             googleSignIn()
         }
+
+
+
+        // Define the text
+        val text = "By signing up, you are agreeing to our Terms and Conditions & Privacy Policy"
+
+        // Create a SpannableString
+        val spannableString = SpannableString(text)
+
+        // "Terms and Conditions" ClickableSpan and UnderlineSpan
+        val termsClickable = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                val intent = Intent(this@RegisterActivity, WebViewActivity::class.java)
+                intent.putExtra("webview_type", "terms")
+                intent.putExtra("url", getString(R.string.terms_url))
+                startActivity(intent)
+            }
+        }
+
+        spannableString.setSpan(termsClickable, 39, 59, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), 39, 59, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(ForegroundColorSpan(getColor(R.color.colorPrimary)), 39, 59, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        // "Privacy Policy" ClickableSpan and UnderlineSpan
+        val privacyClickable = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                val intent = Intent(this@RegisterActivity, WebViewActivity::class.java)
+                intent.putExtra("webview_type", "policy")
+                intent.putExtra("url", getString(R.string.policy_url))
+                startActivity(intent)
+            }
+        }
+
+        spannableString.setSpan(privacyClickable, 62, 76, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(UnderlineSpan(), 62, 76, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannableString.setSpan(ForegroundColorSpan(getColor(R.color.colorPrimary)), 62, 76, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+        // Set the SpannableString on the TextView
+        viewBinding.tvLegal.text = spannableString
+        viewBinding.tvLegal.movementMethod = android.text.method.LinkMovementMethod.getInstance()
     }
 
-    private fun registerWithEmail(email: String, password: String) {
+    private fun registerWithEmail(email: String, password: String, name: String) {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
                     // Registration successful, save user details in REST API
                     val user = auth.currentUser
                     user?.let {
-                        saveUserDetails(user)
+                        RetrofitClient.API_KEY = user.uid
+                        val userRequest = UserRequest(user.uid, name, email)
+                        saveUserDetails(userRequest)
                     }
                 } else {
                     Log.w(TAG, "Registration failed", task.exception)
@@ -141,7 +193,11 @@ class RegisterActivity : AppCompatActivity() {
                     // Sign-in successful, save user details in REST API
                     val user = auth.currentUser
                     user?.let {
-                        saveUserDetails(user)
+                        RetrofitClient.API_KEY = user.uid
+                        val userRequest = user?.let {
+                            UserRequest(user.uid, user.displayName ?: "", user.email ?: "")
+                        }
+                        saveUserDetails(userRequest)
                     }
                 } else {
                     Log.w(TAG, "Google sign in failed", task.exception)
@@ -149,13 +205,9 @@ class RegisterActivity : AppCompatActivity() {
             }
     }
 
-    private fun saveUserDetails(user: FirebaseUser?) {
-        if (user != null) {
-            RetrofitClient.API_KEY = user.uid
-        }
-        val userRequest = user?.let {
-            UserRequest(user.uid, user.displayName ?: "", user.email ?: "")
-        }
+    private fun saveUserDetails(userRequest: UserRequest?) {
+
+
 
         if (userRequest != null) {
             // Access the apiInterface instance
@@ -174,15 +226,21 @@ class RegisterActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: retrofit2.Call<ResponseHandler>, t: Throwable) {
-                    Log.e(TAG, "Network request failed", t)
-                    if (t is IOException) {
-                        Toast.makeText(this@RegisterActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this@RegisterActivity, "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                    }
+                    CommonUtils.apiRequestFailedToast(mContext, t)
                 }
             })
         }
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        return Patterns.EMAIL_ADDRESS.matcher(email).matches()
+    }
+
+    // Helper function to validate strong password
+    private fun isValidPassword(password: String): Boolean {
+        // Password should be at least 8 characters, contain an uppercase letter, a lowercase letter, a number, and a special character
+        val passwordPattern = Regex("^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[@#\$%^&+=!]).{8,}$")
+        return passwordPattern.matches(password)
     }
 
 

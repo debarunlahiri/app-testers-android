@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.util.Patterns
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -18,16 +19,20 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
 import com.summitcodeworks.apptesters.databinding.FragmentAddBinding
 import com.summitcodeworks.apptesters.models.UserAppRequest
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
 import com.summitcodeworks.apptesters.models.userDetails.UserDetails
+import com.summitcodeworks.apptesters.models.userDetails.UserDetailsResponse
 import com.summitcodeworks.apptesters.utils.CommonUtils
 import com.summitcodeworks.apptesters.utils.CommonUtils.Companion.applyBoldStyle
 import com.summitcodeworks.apptesters.utils.SharedPrefsManager
@@ -61,6 +66,9 @@ class AddFragment : Fragment() {
 
     private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
 
+    private lateinit var auth: FirebaseAuth
+    private lateinit var currentUser: FirebaseUser
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
@@ -83,8 +91,35 @@ class AddFragment : Fragment() {
 
         mContext = requireContext()
 
+        auth = FirebaseAuth.getInstance()
+        currentUser = auth.currentUser!!
+
         viewBinding.pbPostAppProgressBar.visibility = View.GONE
-        authenticateUser()
+        CommonUtils.authenticateUser(mContext, object : AuthenticationCallback {
+            override fun onSuccess(userDetails: UserDetailsResponse?) {
+                if (userDetails != null) {
+                    SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
+                    val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
+                    viewBinding.tvPostAppAvailableCredits.text = applyBoldStyle("Available Credits:", postedOnText)
+
+                    if (userDetails.userCredits >= 60) {
+                        viewBinding.bPostApp.isEnabled = true
+                    } else {
+                        viewBinding.bPostApp.isEnabled = false
+                    }
+                } else {
+                    Log.e(TAG, "User details are null")
+                    Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String) {
+            }
+
+            override fun onFailure(throwable: Throwable) {
+            }
+
+        })
 
         val storageRef: StorageReference = Firebase.storage("gs://app-testers-6b94a.appspot.com").reference
 
@@ -114,34 +149,43 @@ class AddFragment : Fragment() {
         }
 
         viewBinding.bUploadLogo.setOnClickListener {
-            // Show a dialog to choose between camera or gallery
             checkPermissions()
         }
 
         viewBinding.bPostApp.setOnClickListener {
-            viewBinding.pbPostAppProgressBar.visibility = View.VISIBLE
-            viewBinding.bPostApp.visibility = View.GONE
+            if (currentUser.isEmailVerified) {
+                viewBinding.pbPostAppProgressBar.visibility = View.VISIBLE
+                viewBinding.bPostApp.visibility = View.GONE
 
-            val appName = viewBinding.tiePostAppName.text.toString()
-            val appDescription = viewBinding.tiePostAppDescription.text.toString()
-            val appLink = viewBinding.tiePostAppLink.text.toString()
-            val appLogo = selectedImageUri
-            val appDevName = viewBinding.tiePostAppDevName.text.toString()
+                val appName = viewBinding.tiePostAppName.text.toString()
+                val appDescription = viewBinding.tiePostAppDescription.text.toString()
+                val appLink = viewBinding.tiePostAppLink.text.toString()
+                val appLogo = selectedImageUri
+                val appDevName = viewBinding.tiePostAppDevName.text.toString()
 
-            if (appName.isNotEmpty() && appDescription.isNotEmpty() && appLink.isNotEmpty() && appLogo != null && appDevName.isNotEmpty()) {
-                // All fields are filled, proceed with uploading the app
-                var userAppRequest = UserAppRequest()
-                uploadImageToFirebase(appLogo, storageRef, userAppRequest)
-
+                if (appName.isNotEmpty() && appDescription.isNotEmpty() && appLink.isNotEmpty() && appLogo != null && appDevName.isNotEmpty()) {
+                    if (Patterns.WEB_URL.matcher(appLink).matches() && appLink.contains("id=") && appLink.contains("com.")) {
+                        val userAppRequest = UserAppRequest()
+                        uploadImageToFirebase(appLogo, storageRef, userAppRequest)
+                    } else {
+                        Toast.makeText(mContext, "Please enter a valid URL with an Android package name", Toast.LENGTH_SHORT).show()
+                        viewBinding.pbPostAppProgressBar.visibility = View.GONE
+                        viewBinding.bPostApp.visibility = View.VISIBLE
+                    }
+                } else {
+                    Toast.makeText(mContext, "Please fill in all fields", Toast.LENGTH_SHORT).show()
+                    viewBinding.pbPostAppProgressBar.visibility = View.GONE
+                    viewBinding.bPostApp.visibility = View.VISIBLE
+                }
             } else {
-                // Show a message indicating that all fields are required
-                Toast.makeText(mContext, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                viewBinding.pbPostAppProgressBar.visibility = View.GONE
-                viewBinding.bPostApp.visibility = View.VISIBLE
+                CommonUtils.showToastLong(mContext, "Please verify your e-mail first")
             }
 
         }
 
+
+        viewBinding.tiePostAppDevName.setText(SharedPrefsManager.getUserDetails(mContext).userName)
+        viewBinding.tiePostAppDevName.isEnabled = false
     }
 
     private fun uploadImageToFirebase(
@@ -177,9 +221,11 @@ class AddFragment : Fragment() {
                                     viewBinding.bPostApp.visibility = View.VISIBLE
                                     viewBinding.bPostApp.isEnabled = true
                                     clearFields()
-                                    authenticateUser()
+                                    CommonUtils.authenticateUser(mContext)
                                 }
                             } else {
+                                viewBinding.pbPostAppProgressBar.visibility = View.GONE
+                                viewBinding.bPostApp.visibility = View.VISIBLE
                                 Toast.makeText(mContext, "Error: " + (response.body()?.header?.responseMessage
                                     ?: ""), Toast.LENGTH_SHORT).show()
                             }
@@ -188,12 +234,7 @@ class AddFragment : Fragment() {
                         override fun onFailure(p0: Call<ResponseHandler>, p1: Throwable) {
                             viewBinding.pbPostAppProgressBar.visibility = View.GONE
                             viewBinding.bPostApp.visibility = View.VISIBLE
-                            Log.e(TAG, "Network request failed", p1)
-                            if (p1 is IOException) {
-                                Toast.makeText(mContext, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                            } else {
-                                Toast.makeText(mContext, "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                            }
+                            CommonUtils.apiRequestFailedToast(mContext, p1)
                         }
 
                     })
@@ -202,6 +243,8 @@ class AddFragment : Fragment() {
             .addOnFailureListener { e ->
                 // Handle unsuccessful uploads
                 Toast.makeText(mContext, "Image upload failed: ${e.message}", Toast.LENGTH_LONG).show()
+                viewBinding.pbPostAppProgressBar.visibility = View.GONE
+                viewBinding.bPostApp.visibility = View.VISIBLE
             }
     }
 
@@ -258,44 +301,6 @@ class AddFragment : Fragment() {
         }
         imageResultLauncher.launch(fileManagerIntent)
     }
-
-    private fun authenticateUser() {
-        RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
-            override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
-                if (response.isSuccessful) {
-                    val userDetails = response.body()?.response
-                    if (userDetails != null) {
-                        SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
-                        val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
-                        viewBinding.tvPostAppAvailableCredits.text = applyBoldStyle("Available Credits:", postedOnText)
-
-                        if (userDetails.userCredits >= 60) {
-                            viewBinding.bPostApp.isEnabled = true
-                        } else {
-                            viewBinding.bPostApp.isEnabled = false
-                        }
-                    } else {
-                        Log.e(TAG, "User details are null")
-                        Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
-                    Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
-                }
-            }
-
-            override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
-                Log.e(TAG, "Network request failed", p1)
-                if (p1 is IOException) {
-                    Toast.makeText(requireContext(), "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(requireContext(), "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-        })
-    }
-
 
 
     companion object {

@@ -27,6 +27,9 @@ public class UserDetailsResponse {
     @SerializedName("user_name")
     @Expose
     private String userName;
+    @SerializedName("user_photo_url")
+    @Expose
+    private String userPhotoUrl;
 
     public Boolean getUseFlag() {
         return useFlag;
@@ -84,4 +87,11 @@ public class UserDetailsResponse {
         this.userName = userName;
     }
 
+    public String getUserPhotoUrl() {
+        return userPhotoUrl;
+    }
+
+    public void setUserPhotoUrl(String userPhotoUrl) {
+        this.userPhotoUrl = userPhotoUrl;
+    }
 }

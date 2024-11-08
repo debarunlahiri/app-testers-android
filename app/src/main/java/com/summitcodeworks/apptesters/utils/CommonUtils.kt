@@ -1,9 +1,21 @@
 package com.summitcodeworks.apptesters.utils
 
+import android.content.Context
 import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
+import android.util.Log
+import android.widget.Toast
+import com.summitcodeworks.apptesters.activities.RegisterActivity
+import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
+import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
+import com.summitcodeworks.apptesters.models.userDetails.UserDetails
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,6 +66,67 @@ class CommonUtils {
             val end = start + boldPart.length
             spannableString.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
             return spannableString
+        }
+
+        fun showToastLong(mContext: Context, message: String) {
+            Toast.makeText(mContext, message, Toast.LENGTH_LONG).show()
+
+        }
+
+        fun apiRequestFailedToast(mContext: Context, p1: Throwable) {
+            Log.e(RegisterActivity.TAG, "Network request failed", p1)
+            if (p1 is IOException) {
+                Toast.makeText(mContext, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(mContext, "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+        fun authenticateUser(mContext: Context, callback: AuthenticationCallback) {
+            RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
+                override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
+                    if (response.isSuccessful) {
+                        val userDetails = response.body()?.response
+                        if (userDetails != null) {
+                            SharedPrefsManager.saveUserDetails(mContext, userDetails)
+                            callback.onSuccess(userDetails)
+                        } else {
+                            callback.onError(response.code(), "User details are null")
+                        }
+                    } else {
+                        Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
+                        Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
+                        callback.onError(response.code(), response.message())
+                    }
+                }
+
+                override fun onFailure(call: Call<UserDetails>, t: Throwable) {
+                    apiRequestFailedToast(mContext, t)
+                    callback.onFailure(t)
+                }
+            })
+        }
+
+        fun authenticateUser(mContext: Context) {
+            RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
+                override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
+                    if (response.isSuccessful) {
+                        val userDetails = response.body()?.response
+                        if (userDetails != null) {
+                            SharedPrefsManager.saveUserDetails(mContext, userDetails)
+                        } else {
+                        }
+                    } else {
+                        Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
+                        Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
+                    }
+                }
+
+                override fun onFailure(call: Call<UserDetails>, t: Throwable) {
+                    apiRequestFailedToast(mContext, t)
+                }
+            })
         }
 
 

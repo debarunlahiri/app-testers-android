@@ -1,5 +1,6 @@
 package com.summitcodeworks.apptesters.activities
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Build
@@ -26,10 +27,13 @@ import com.google.firebase.auth.FirebaseUser
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
 import com.summitcodeworks.apptesters.databinding.ActivityLoginBinding
 import com.summitcodeworks.apptesters.models.UserRequest
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
 import com.summitcodeworks.apptesters.models.userDetails.UserDetails
+import com.summitcodeworks.apptesters.models.userDetails.UserDetailsResponse
+import com.summitcodeworks.apptesters.utils.CommonUtils
 import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import jp.wasabeef.glide.transformations.BlurTransformation
 import retrofit2.Call
@@ -38,6 +42,8 @@ import retrofit2.Response
 import java.io.IOException
 
 class LoginActivity : AppCompatActivity() {
+
+    private lateinit var mContext: Context
 
     private lateinit var viewBinding: ActivityLoginBinding
     private lateinit var auth: FirebaseAuth
@@ -49,6 +55,8 @@ class LoginActivity : AppCompatActivity() {
         viewBinding = ActivityLoginBinding.inflate(layoutInflater)
         enableEdgeToEdge() // Enable edge-to-edge display
         setContentView(viewBinding.root)
+
+        mContext = this
 
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
@@ -181,7 +189,24 @@ class LoginActivity : AppCompatActivity() {
                             Log.d(TAG, "User registered successfully: ${response.body()}")
                         }
                     } else if (response.code() == 409) {
-                        authenticateUser()
+                        CommonUtils.authenticateUser(mContext, object : AuthenticationCallback {
+                            override fun onSuccess(userDetails: UserDetailsResponse?) {
+                                if (userDetails != null) {
+                                    SharedPrefsManager.saveUserDetails(this@LoginActivity, userDetails)
+                                    sendToMain()
+                                } else {
+                                    Log.e(TAG, "User details are null")
+                                    Toast.makeText(this@LoginActivity, "User details are null", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+
+                            override fun onError(errorCode: Int, errorMessage: String) {
+                            }
+
+                            override fun onFailure(throwable: Throwable) {
+                            }
+
+                        })
                     } else {
                         Log.e(TAG, "Registration failed with code: ${response.code()} - ${response.message()}")
                         Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
@@ -189,46 +214,13 @@ class LoginActivity : AppCompatActivity() {
                 }
 
                 override fun onFailure(call: Call<ResponseHandler>, t: Throwable) {
-                    Log.e(TAG, "Network request failed", t)
-                    if (t is IOException) {
-                        Toast.makeText(this@LoginActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(this@LoginActivity, "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                    }
+                    CommonUtils.apiRequestFailedToast(mContext, t)
                 }
             })
         }
     }
 
-    private fun authenticateUser() {
-        RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
-            override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
-                if (response.isSuccessful) {
-                    val userDetails = response.body()?.response
-                    if (userDetails != null) {
-                        SharedPrefsManager.saveUserDetails(this@LoginActivity, userDetails)
-                        sendToMain()
-                    } else {
-                        Log.e(TAG, "User details are null")
-                        Toast.makeText(this@LoginActivity, "User details are null", Toast.LENGTH_SHORT).show()
-                    }
-                } else {
-                    Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
-                    Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
-                }
-            }
 
-            override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
-                Log.e(TAG, "Network request failed", p1)
-                if (p1 is IOException) {
-                    Toast.makeText(this@LoginActivity, "Network error. Please try again.", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this@LoginActivity, "An unexpected error occurred. Please try again.", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-        })
-    }
 
     private fun sendToMain() {
         val mainIntent = Intent(this, MainActivity::class.java)

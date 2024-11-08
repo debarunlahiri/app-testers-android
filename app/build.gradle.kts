@@ -100,4 +100,6 @@ dependencies {
 
     implementation(libs.avatarview.coil)
 
+    implementation("com.google.android.gms:play-services-ads:23.4.0")
+
 }

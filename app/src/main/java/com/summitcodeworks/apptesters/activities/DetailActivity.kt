@@ -1,5 +1,6 @@
 package com.summitcodeworks.apptesters.activities
 
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Configuration
@@ -23,9 +24,14 @@ import com.caverock.androidsvg.SVG
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.databinding.ActivityDetailBinding
+import com.summitcodeworks.apptesters.models.MarkStageRequest
 import com.summitcodeworks.apptesters.models.appDetails.AppDetails
 import com.summitcodeworks.apptesters.models.appDetails.AppDetailsResponse
+import com.summitcodeworks.apptesters.models.markStage.MarkStage
+import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
 import com.summitcodeworks.apptesters.utils.CommonUtils
+import com.summitcodeworks.apptesters.utils.SharedPrefsManager
+import io.getstream.avatarview.coil.loadImage
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -35,37 +41,26 @@ import java.net.URL
 
 class DetailActivity : AppCompatActivity() {
 
+    private lateinit var mContext: Context
+
     private var appDetailsResponse: AppDetailsResponse = AppDetailsResponse()
     private lateinit var viewBinding: ActivityDetailBinding
     private var appId: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         viewBinding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
 
-        // Get the app ID from the intent
-        appId = intent.getIntExtra("app_id", 0)
+        mContext = this
 
-        setupUI()
-        if (appId != 0) {
-            fetchAppDetails(appId)
-
-            viewBinding.bTestNow.setOnClickListener {
-                if (packageName.isNotEmpty()) {
-                    checkAndLaunchApp()
-                } else {
-                    Toast.makeText(this, "App package not found", Toast.LENGTH_SHORT).show()
-                }
-            }
-        } else {
-            Toast.makeText(this, "Invalid App ID", Toast.LENGTH_SHORT).show()
-            finish()
+        viewBinding.bDetailAppLink.setOnClickListener {
+            checkAndLaunchApp(true)
         }
+
     }
 
-    private fun checkAndLaunchApp() {
+    private fun checkAndLaunchApp(isExternalClick: Boolean = false) {
         val pm = packageManager
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -76,17 +71,71 @@ class DetailActivity : AppCompatActivity() {
             }
 
             val launchIntent = pm.getLaunchIntentForPackage(appDetailsResponse.appPkgNme)
-            if (launchIntent != null) {
-                startActivity(launchIntent)
-            } else {
+
+            if (isExternalClick) {
                 val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(appDetailsResponse.appAppLink))
                 startActivity(browserIntent)
+            } else {
+                val buttonText = viewBinding.bTestNow.text.toString()
+                when (buttonText) {
+                    getString(R.string.install_app) -> {
+                        markStageNo(1)
+                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(appDetailsResponse.appAppLink))
+                        startActivity(browserIntent)
+                    }
+                    getString(R.string.test_now) -> {
+                        if (launchIntent != null) {
+                            markStageNo(2)
+                            startActivity(launchIntent)
+                        } else {
+                            CommonUtils.showToastLong(mContext, "App is not available")
+                        }
+                    }
+                    getString(R.string.give_feedback) -> {
+                        markStageNo(3)
+                        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(appDetailsResponse.appAppLink))
+                        startActivity(browserIntent)
+                    }
+                    getString(R.string.open_app) -> {
+                        if (launchIntent != null) {
+                            startActivity(launchIntent)
+                        } else {
+                            CommonUtils.showToastLong(mContext, "App is not available")
+                        }
+                    }
+                }
             }
+
+
         } catch (e: PackageManager.NameNotFoundException) {
             Toast.makeText(this, "App not installed, opening link", Toast.LENGTH_SHORT).show()
             val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(appDetailsResponse.appAppLink))
             startActivity(browserIntent)
+
         }
+    }
+
+    private fun markStageNo(stageNo: Int) {
+        var markStageRequest = MarkStageRequest()
+        markStageRequest.userId = SharedPrefsManager.getUserDetails(mContext).userId
+        markStageRequest.stageNo = stageNo
+        markStageRequest.appId = appId
+
+        RetrofitClient.apiInterface.markStage(markStageRequest).enqueue(object : Callback<ResponseHandler> {
+            override fun onResponse(p0: Call<ResponseHandler>, p1: Response<ResponseHandler>) {
+                if (p1.isSuccessful) {
+                    if (p1.code() == 201) {
+                        updateButtonText()
+
+                    }
+                }
+            }
+
+            override fun onFailure(p0: Call<ResponseHandler>, p1: Throwable) {
+                CommonUtils.apiRequestFailedToast(mContext, p1)
+            }
+
+        })
     }
 
     private fun setupUI() {
@@ -145,7 +194,7 @@ class DetailActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<AppDetails>, t: Throwable) {
-                Toast.makeText(this@DetailActivity, "Error: ${t.message}", Toast.LENGTH_SHORT).show()
+                CommonUtils.apiRequestFailedToast(mContext, t)
             }
         })
     }
@@ -168,21 +217,63 @@ class DetailActivity : AppCompatActivity() {
         viewBinding.tvDetailDesc.text = appDetailsResponse.appDesc
 
         // Set developer name with bold "Developed by"
-        val devByText = "Developed by ${appDetailsResponse.appDevName}"
-        viewBinding.tvDetailDevelopBy.text = applyBoldStyle("Developed by", devByText)
+        val devByText = "Developed by: ${appDetailsResponse.appDevName}"
+//        viewBinding.tvDetailDeveloperName.text = applyBoldStyle("Developed by: ", devByText)
+        viewBinding.tvDetailDeveloperName.text = appDetailsResponse.appDevName
+
+        if (SharedPrefsManager.getUserDetails(mContext).userPhotoUrl != null) {
+            viewBinding.avDevProfileImage.loadImage(SharedPrefsManager.getUserDetails(mContext).userPhotoUrl)
+        } else {
+            viewBinding.avDevProfileImage.avatarInitials = appDetailsResponse.appDevName
+        }
 
         // Set posted on date with bold "Posted on"
-        val postedOnText = "Posted on ${CommonUtils.convertDate(appDetailsResponse.appCreatedOn)}"
-        viewBinding.tvDetailPostedOn.text = applyBoldStyle("Posted on", postedOnText)
+        val postedOnText = "Posted on: ${CommonUtils.convertDate(appDetailsResponse.appCreatedOn)}"
+        viewBinding.tvDetailPostedOn.text = applyBoldStyle("Posted on: ", postedOnText)
 
         // Set credits with bold "Created by"
-        val creditsText = "Credits ${appDetailsResponse.appCredit}"
-        viewBinding.tvDetailCredits.text = applyBoldStyle("Credits ", creditsText)
+        val creditsText = "Credits: ${appDetailsResponse.appCredit}"
+        viewBinding.tvDetailCredits.text = applyBoldStyle("Credits: ", creditsText)
 
         updateButtonText()
     }
 
     private fun updateButtonText() {
+        RetrofitClient.apiInterface.getMarkStageByUserId(SharedPrefsManager.getUserDetails(mContext).userId, appId).enqueue(object : Callback<MarkStage> {
+            override fun onResponse(call: Call<MarkStage>, response: Response<MarkStage>) {
+                if (response.isSuccessful) {
+                    if (response.code() == 200) {
+                        if (response.body()?.response?.stageId == null) {
+                            checkAppInstalledOrNot()
+                        } else {
+                            val markStageResponse = response.body()?.response
+                            if (markStageResponse != null) {
+                                if (markStageResponse.stageNo == 1) {
+                                    viewBinding.bTestNow.text = getString(R.string.test_now)
+                                } else if (markStageResponse.stageNo == 2) {
+                                    viewBinding.bTestNow.text = getString(R.string.give_feedback)
+                                } else if (markStageResponse.stageNo == 3) {
+                                    viewBinding.bTestNow.text = getString(R.string.open_app)
+                                }
+                            } else {
+                                viewBinding.bTestNow.text = getString(R.string.install_app)
+                            }
+                        }
+                    } else if (response.code() == 404) {
+                        checkAppInstalledOrNot()
+                    }
+                }
+            }
+
+            override fun onFailure(p0: Call<MarkStage>, p1: Throwable) {
+                CommonUtils.apiRequestFailedToast(mContext, p1)
+            }
+
+        })
+
+    }
+
+    private fun checkAppInstalledOrNot() {
         val pm = packageManager
         try {
             // API check for Android 13 (API level 33) and above
@@ -194,10 +285,9 @@ class DetailActivity : AppCompatActivity() {
             }
 
             // App is installed, update button text to "Test Now"
-            viewBinding.bTestNow.text = "Test Now"
+            viewBinding.bTestNow.text = getString(R.string.test_now)
         } catch (e: PackageManager.NameNotFoundException) {
-            // App is not installed, update button text to "Install Now"
-            viewBinding.bTestNow.text = "Install Now"
+            viewBinding.bTestNow.text = getString(R.string.install_app)
         }
     }
 
@@ -231,5 +321,26 @@ class DetailActivity : AppCompatActivity() {
         val end = start + boldPart.length
         spannableString.setSpan(StyleSpan(Typeface.BOLD), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         return spannableString
+    }
+
+    override fun onResume() {
+        super.onResume()
+        appId = intent.getIntExtra("app_id", 0)
+
+        setupUI()
+        if (appId != 0) {
+            fetchAppDetails(appId)
+
+            viewBinding.bTestNow.setOnClickListener {
+                if (packageName.isNotEmpty()) {
+                    checkAndLaunchApp()
+                } else {
+                    Toast.makeText(this, "App package not found", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } else {
+            Toast.makeText(this, "Invalid App ID", Toast.LENGTH_SHORT).show()
+            finish()
+        }
     }
 }

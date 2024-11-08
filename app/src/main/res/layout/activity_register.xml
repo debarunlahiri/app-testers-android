@@ -10,8 +10,8 @@
 
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -131,6 +131,18 @@
                 app:rippleColor="?attr/colorOnPrimary"
                 app:strokeColor="@color/grey"
                 app:strokeWidth="1dp" />
+
+            <TextView
+                android:id="@+id/tvLegal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="32dp"
+                android:gravity="center"
+                android:text="By signing up, you are agreeing to our Terms and Conditions &amp; Privacy Policy"
+                android:autoLink="web"
+                android:textColor="@android:color/black"/>
 
         </LinearLayout>
     </androidx.cardview.widget.CardView>

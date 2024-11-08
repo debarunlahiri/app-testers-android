@@ -11,9 +11,12 @@ import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.activities.LoginActivity
+import com.summitcodeworks.apptesters.activities.MyAppsActivity
+import com.summitcodeworks.apptesters.activities.SettingsActivity
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.databinding.FragmentProfileBinding
 import com.summitcodeworks.apptesters.models.appDetails.AppDetails
+import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import io.getstream.avatarview.coil.loadImage
 import retrofit2.Call
 import retrofit2.Callback
@@ -73,6 +76,16 @@ class ProfileFragment : Fragment() {
             sentToLogin()
         }
 
+        viewBinding.llYourApps.setOnClickListener {
+            val myAppsIntent = Intent(mContext, MyAppsActivity::class.java)
+            startActivity(myAppsIntent)
+        }
+
+        viewBinding.llSettings.setOnClickListener {
+            val settingsIntent = Intent(mContext, SettingsActivity::class.java)
+            startActivity(settingsIntent)
+        }
+
     }
 
     private fun sentToLogin() {
@@ -83,14 +96,13 @@ class ProfileFragment : Fragment() {
 
 
     private fun fetchUserDetails() {
-        val user = auth.currentUser
-        if (user != null) {
-            viewBinding.tvProfileEmail.text = user.email
-            viewBinding.tvProfileName.text = user.displayName
-            if (user.photoUrl != null) {
-                viewBinding.avProfileImage.loadImage(user.photoUrl)
+        if (auth.currentUser != null) {
+            viewBinding.tvProfileEmail.text = SharedPrefsManager.getUserDetails(mContext).userEmail
+            viewBinding.tvProfileName.text = SharedPrefsManager.getUserDetails(mContext).userName
+            if (SharedPrefsManager.getUserDetails(mContext).userPhotoUrl != null) {
+                viewBinding.avProfileImage.loadImage(SharedPrefsManager.getUserDetails(mContext).userPhotoUrl)
             } else {
-                viewBinding.avProfileImage.avatarInitials = user.displayName?.get(0).toString()
+                viewBinding.avProfileImage.avatarInitials = SharedPrefsManager.getUserDetails(mContext).userName
             }
         }
     }
