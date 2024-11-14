@@ -129,7 +129,7 @@ class CreditsActivity : AppCompatActivity(), OnUserEarnedRewardListener {
     private fun addCreditsToUser(amount: Int) {
         val addCreditsRequest = AddCreditsRequest()
         addCreditsRequest.credits = amount
-        RetrofitClient.apiInterface.addCredits(SharedPrefsManager.getUserDetails(mContext).userId, addCreditsRequest).enqueue(object : Callback<ResponseHandler> {
+        RetrofitClient.apiInterface(mContext).addCredits(SharedPrefsManager.getUserDetails(mContext).userId, addCreditsRequest).enqueue(object : Callback<ResponseHandler> {
             override fun onResponse(p0: Call<ResponseHandler>, p1: Response<ResponseHandler>) {
                 if (p1.isSuccessful) {
                     if (p1.code() == 200) {

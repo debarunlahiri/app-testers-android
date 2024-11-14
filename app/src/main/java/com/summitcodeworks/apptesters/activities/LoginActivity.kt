@@ -58,6 +58,7 @@ class LoginActivity : AppCompatActivity() {
 
         mContext = this
 
+
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
@@ -178,7 +179,7 @@ class LoginActivity : AppCompatActivity() {
 
 
         if (userRequest != null) {
-            RetrofitClient.apiInterface.registerUser(userRequest).enqueue(object : Callback<ResponseHandler> {
+            RetrofitClient.apiInterface(mContext).registerUser(userRequest).enqueue(object : Callback<ResponseHandler> {
                 override fun onResponse(
                     call: Call<ResponseHandler>,
                     response: Response<ResponseHandler>

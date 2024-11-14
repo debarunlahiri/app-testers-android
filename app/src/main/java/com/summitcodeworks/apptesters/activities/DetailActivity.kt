@@ -121,7 +121,7 @@ class DetailActivity : AppCompatActivity() {
         markStageRequest.stageNo = stageNo
         markStageRequest.appId = appId
 
-        RetrofitClient.apiInterface.markStage(markStageRequest).enqueue(object : Callback<ResponseHandler> {
+        RetrofitClient.apiInterface(mContext).markStage(markStageRequest).enqueue(object : Callback<ResponseHandler> {
             override fun onResponse(p0: Call<ResponseHandler>, p1: Response<ResponseHandler>) {
                 if (p1.isSuccessful) {
                     if (p1.code() == 201) {
@@ -182,7 +182,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun fetchAppDetails(appId: Int) {
-        RetrofitClient.apiInterface.getAppDetails(appId).enqueue(object : Callback<AppDetails> {
+        RetrofitClient.apiInterface(mContext).getAppDetails(appId).enqueue(object : Callback<AppDetails> {
             override fun onResponse(call: Call<AppDetails>, response: Response<AppDetails>) {
                 if (response.isSuccessful) {
                     response.body()?.let { appDetails ->
@@ -239,7 +239,7 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun updateButtonText() {
-        RetrofitClient.apiInterface.getMarkStageByUserId(SharedPrefsManager.getUserDetails(mContext).userId, appId).enqueue(object : Callback<MarkStage> {
+        RetrofitClient.apiInterface(mContext).getMarkStageByUserId(SharedPrefsManager.getUserDetails(mContext).userId, appId).enqueue(object : Callback<MarkStage> {
             override fun onResponse(call: Call<MarkStage>, response: Response<MarkStage>) {
                 if (response.isSuccessful) {
                     if (response.code() == 200) {

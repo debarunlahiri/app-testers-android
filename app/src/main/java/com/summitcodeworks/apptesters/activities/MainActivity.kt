@@ -41,7 +41,6 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
 
         mContext = this
-        RetrofitClient.initialize(this)
 
         // Enable dark mode based on system settings
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)

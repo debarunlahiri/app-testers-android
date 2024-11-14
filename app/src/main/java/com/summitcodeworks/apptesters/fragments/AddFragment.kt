@@ -209,7 +209,7 @@ class AddFragment : Fragment() {
                     userAppRequest.appDevName = viewBinding.tiePostAppDevName.text.toString()
                     userAppRequest.appCredit = "20"
 
-                    RetrofitClient.apiInterface.createApp(userAppRequest).enqueue(object : Callback<ResponseHandler> {
+                    RetrofitClient.apiInterface(mContext).createApp(userAppRequest).enqueue(object : Callback<ResponseHandler> {
                         override fun onResponse(
                             call: Call<ResponseHandler>,
                             response: Response<ResponseHandler>

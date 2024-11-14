@@ -19,13 +19,13 @@ import retrofit2.http.Query
 
 interface ApiInterface {
 
-    @POST("user/register-user")
+    @POST("users/register-user")
     fun registerUser(@Body userRequest: UserRequest): Call<ResponseHandler>
 
     @POST("app/create-app")
     fun createApp(@Body userAppRequest: UserAppRequest): Call<ResponseHandler>
 
-    @POST("user/authenticate")
+    @POST("users/authenticate")
     fun authenticateUser(): Call<UserDetails>
 
     @POST("api/stages")
@@ -45,7 +45,7 @@ interface ApiInterface {
     @GET("user/user-apps")
     fun getUserApps(): Call<UserApps>
 
-    @GET("user/user-tested-apps")
+    @GET("users/user-tested-apps")
     fun getUserTestedApps(): Call<UserApps>
 
     @GET("app/search-apps")
@@ -53,7 +53,7 @@ interface ApiInterface {
 
 
 
-    @PUT("user/add-credits/{userId}")
+    @PUT("users/add-credits/{userId}")
     fun addCredits(@Path("userId") userId: Int, @Body addCreditsRequest: AddCreditsRequest): Call<ResponseHandler>
 
 

@@ -51,7 +51,6 @@ class RegisterActivity : AppCompatActivity() {
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 
-        RetrofitClient.initialize(this)
 
         // Make the status bar transparent and text color white
         if (Build.VERSION.SDK_INT >= 21) {
@@ -211,7 +210,7 @@ class RegisterActivity : AppCompatActivity() {
 
         if (userRequest != null) {
             // Access the apiInterface instance
-            RetrofitClient.apiInterface.registerUser(userRequest).enqueue(object : retrofit2.Callback<ResponseHandler> {
+            RetrofitClient.apiInterface(mContext).registerUser(userRequest).enqueue(object : retrofit2.Callback<ResponseHandler> {
                 override fun onResponse(
                     call: retrofit2.Call<ResponseHandler>,
                     response: retrofit2.Response<ResponseHandler>

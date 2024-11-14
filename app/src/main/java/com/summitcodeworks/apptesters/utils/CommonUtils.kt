@@ -84,7 +84,7 @@ class CommonUtils {
 
 
         fun authenticateUser(mContext: Context, callback: AuthenticationCallback) {
-            RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
+            RetrofitClient.apiInterface(mContext).authenticateUser().enqueue(object : Callback<UserDetails> {
                 override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
                     if (response.isSuccessful) {
                         val userDetails = response.body()?.response
@@ -109,7 +109,7 @@ class CommonUtils {
         }
 
         fun authenticateUser(mContext: Context) {
-            RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
+            RetrofitClient.apiInterface(mContext).authenticateUser().enqueue(object : Callback<UserDetails> {
                 override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
                     if (response.isSuccessful) {
                         val userDetails = response.body()?.response

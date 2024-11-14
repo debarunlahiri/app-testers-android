@@ -135,7 +135,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
     }
 
     private fun searchApps(searchText: String) {
-        RetrofitClient.apiInterface.searchApps(searchText).enqueue(object : Callback<UserApps> {
+        RetrofitClient.apiInterface(mContext).searchApps(searchText).enqueue(object : Callback<UserApps> {
             override fun onResponse(p0: Call<UserApps>, p1: Response<UserApps>) {
                 if (p1.isSuccessful) {
                     if (p1.body()?.header?.responseCode == 200) {
@@ -175,7 +175,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
         homeAdapter.setUserAppList(userAppsList)
         homeAdapter.notifyDataSetChanged()
 
-        RetrofitClient.apiInterface.getAppList(page, perPage).enqueue(object : Callback<UserApps> {
+        RetrofitClient.apiInterface(mContext).getAppList(page, perPage).enqueue(object : Callback<UserApps> {
             override fun onResponse(call: Call<UserApps>, response: Response<UserApps>) {
                 isLoading = false
                 if (response.isSuccessful) {
@@ -203,7 +203,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
 
     private fun fetchAppListMore(page: Int, perPage: Int) {
         isLoading = true
-        RetrofitClient.apiInterface.getAppList(page, perPage).enqueue(object : Callback<UserApps> {
+        RetrofitClient.apiInterface(mContext).getAppList(page, perPage).enqueue(object : Callback<UserApps> {
             override fun onResponse(call: Call<UserApps>, response: Response<UserApps>) {
                 isLoading = false
                 if (response.isSuccessful) {
@@ -227,7 +227,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
 
 
     private fun authenticateUser() {
-        RetrofitClient.apiInterface.authenticateUser().enqueue(object : Callback<UserDetails> {
+        RetrofitClient.apiInterface(mContext).authenticateUser().enqueue(object : Callback<UserDetails> {
             override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
                 if (response.isSuccessful) {
                     val userDetails = response.body()?.response

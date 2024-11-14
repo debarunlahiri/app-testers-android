@@ -49,7 +49,7 @@ class MyAppsActivity : AppCompatActivity() {
     }
 
     private fun fetchTestedApps() {
-        RetrofitClient.apiInterface.getUserTestedApps().enqueue(object : Callback<UserApps> {
+        RetrofitClient.apiInterface(mContext).getUserTestedApps().enqueue(object : Callback<UserApps> {
             override fun onResponse(p0: Call<UserApps>, p1: Response<UserApps>) {
                 if (p1.isSuccessful) {
                     val userApps = p1.body()
@@ -81,7 +81,7 @@ class MyAppsActivity : AppCompatActivity() {
     }
 
     private fun fetchUserApps() {
-        RetrofitClient.apiInterface.getUserApps().enqueue(object : Callback<UserApps> {
+        RetrofitClient.apiInterface(mContext).getUserApps().enqueue(object : Callback<UserApps> {
             override fun onResponse(p0: Call<UserApps>, p1: Response<UserApps>) {
                 if (p1.isSuccessful) {
                     val userApps = p1.body()
