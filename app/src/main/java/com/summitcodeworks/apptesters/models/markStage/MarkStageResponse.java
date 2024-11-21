@@ -6,19 +6,19 @@ import com.google.gson.annotations.SerializedName;
 
 public class MarkStageResponse {
 
-    @SerializedName("app_id")
+    @SerializedName("appId")
     @Expose
     private Integer appId;
-    @SerializedName("create_date")
+    @SerializedName("createDate")
     @Expose
     private String createDate;
-    @SerializedName("stage_id")
+    @SerializedName("stageId")
     @Expose
     private Integer stageId;
-    @SerializedName("stage_no")
+    @SerializedName("stageNo")
     @Expose
     private Integer stageNo;
-    @SerializedName("user_id")
+    @SerializedName("userId")
     @Expose
     private Integer userId;
 

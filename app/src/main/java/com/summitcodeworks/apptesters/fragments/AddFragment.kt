@@ -95,31 +95,7 @@ class AddFragment : Fragment() {
         currentUser = auth.currentUser!!
 
         viewBinding.pbPostAppProgressBar.visibility = View.GONE
-        CommonUtils.authenticateUser(mContext, object : AuthenticationCallback {
-            override fun onSuccess(userDetails: UserDetailsResponse?) {
-                if (userDetails != null) {
-                    SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
-                    val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
-                    viewBinding.tvPostAppAvailableCredits.text = applyBoldStyle("Available Credits:", postedOnText)
-
-                    if (userDetails.userCredits >= 60) {
-                        viewBinding.bPostApp.isEnabled = true
-                    } else {
-                        viewBinding.bPostApp.isEnabled = false
-                    }
-                } else {
-                    Log.e(TAG, "User details are null")
-                    Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            override fun onError(errorCode: Int, errorMessage: String) {
-            }
-
-            override fun onFailure(throwable: Throwable) {
-            }
-
-        })
+        getUserCredits()
 
         val storageRef: StorageReference = Firebase.storage("gs://app-testers-6b94a.appspot.com").reference
 
@@ -130,7 +106,7 @@ class AddFragment : Fragment() {
             if (cameraGranted && storageGranted) {
                 showImageSourceOptions()
             } else {
-                Toast.makeText(mContext, "Permissions denied", Toast.LENGTH_SHORT).show()
+//                Toast.makeText(mContext, "Permissions denied", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -183,9 +159,41 @@ class AddFragment : Fragment() {
 
         }
 
+        viewBinding.tvPostAppRefresh.setOnClickListener {
+            getUserCredits()
+        }
+
 
         viewBinding.tiePostAppDevName.setText(SharedPrefsManager.getUserDetails(mContext).userName)
         viewBinding.tiePostAppDevName.isEnabled = false
+    }
+
+    private fun getUserCredits() {
+        CommonUtils.authenticateUser(mContext, object : AuthenticationCallback {
+            override fun onSuccess(userDetails: UserDetailsResponse?) {
+                if (userDetails != null) {
+                    SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
+                    val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
+                    viewBinding.tvPostAppAvailableCredits.text = applyBoldStyle("Available Credits:", postedOnText)
+
+                    if (userDetails.userCredits >= 60) {
+                        viewBinding.bPostApp.isEnabled = true
+                    } else {
+                        viewBinding.bPostApp.isEnabled = false
+                    }
+                } else {
+                    Log.e(TAG, "User details are null")
+                    Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String) {
+            }
+
+            override fun onFailure(throwable: Throwable) {
+            }
+
+        })
     }
 
     private fun uploadImageToFirebase(
@@ -204,6 +212,7 @@ class AddFragment : Fragment() {
                     userAppRequest.appName = viewBinding.tiePostAppName.text.toString()
                     userAppRequest.appDescription = viewBinding.tiePostAppDescription.text.toString()
                     userAppRequest.appLink = viewBinding.tiePostAppLink.text.toString()
+                    userAppRequest.appWebLink = viewBinding.tiePostAppWebLink.text.toString()
                     userAppRequest.appLogo = downloadUrl.toString()
                     userAppRequest.userCreatedBy = SharedPrefsManager.getUserDetails(mContext).userId.toString()
                     userAppRequest.appDevName = viewBinding.tiePostAppDevName.text.toString()

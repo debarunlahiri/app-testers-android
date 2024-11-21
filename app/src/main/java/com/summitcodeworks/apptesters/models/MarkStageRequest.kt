@@ -3,9 +3,9 @@ package com.summitcodeworks.apptesters.models
 import com.google.gson.annotations.SerializedName
 
 data class MarkStageRequest(
-    @SerializedName("user_id") private var _userId: Int = 0,
-    @SerializedName("app_id") private var _appId: Int = 0,
-    @SerializedName("stage_no") private var _stageNo: Int = 0
+    @SerializedName("userId") private var _userId: Int = 0,
+    @SerializedName("appId") private var _appId: Int = 0,
+    @SerializedName("stageNo") private var _stageNo: Int = 0
 ) {
     var userId: Int
         get() = _userId

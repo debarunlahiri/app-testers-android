@@ -2,6 +2,7 @@ package com.summitcodeworks.apptesters.fragments
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -84,6 +85,15 @@ class ProfileFragment : Fragment() {
         viewBinding.llSettings.setOnClickListener {
             val settingsIntent = Intent(mContext, SettingsActivity::class.java)
             startActivity(settingsIntent)
+        }
+
+        viewBinding.llJoinGroup.setOnClickListener {
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://groups.google.com/g/app-testers-community-summitcodeworks"))
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(mContext, "Unable to open URL", Toast.LENGTH_SHORT).show()
+            }
         }
 
     }

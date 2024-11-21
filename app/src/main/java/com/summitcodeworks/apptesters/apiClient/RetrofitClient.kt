@@ -10,15 +10,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    private const val PROD_BASE_URL = "http://13.60.35.163:8082/"
-    private const val DEV_BASE_URL = "http://192.168.0.229:8082/"
+    private const val PROD_BASE_URL = "https://apptesters-backend.onrender.com"
+    private const val DEV_BASE_URL = "http://192.168.0.36:8082/"
 
     enum class Environment {
         DEV, PROD
     }
 
     // Set this to switch between environments
-    var currentEnvironment = Environment.DEV // Default to DEV
+    var currentEnvironment = Environment.PROD // Default to DEV
     var API_KEY = "" // Replace this with your actual API key
 
     private val baseUrl: String

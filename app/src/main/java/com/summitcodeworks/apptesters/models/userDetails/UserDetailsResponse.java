@@ -6,28 +6,28 @@ import com.google.gson.annotations.SerializedName;
 
 public class UserDetailsResponse {
 
-    @SerializedName("use_flag")
+    @SerializedName("useFlag")
     @Expose
     private Boolean useFlag;
-    @SerializedName("user_creation_date")
+    @SerializedName("userCreationDate")
     @Expose
     private String userCreationDate;
-    @SerializedName("user_credits")
+    @SerializedName("userCredits")
     @Expose
     private Integer userCredits;
-    @SerializedName("user_email")
+    @SerializedName("userEmail")
     @Expose
     private String userEmail;
-    @SerializedName("user_id")
+    @SerializedName("userId")
     @Expose
     private Integer userId;
-    @SerializedName("user_key")
+    @SerializedName("userKey")
     @Expose
     private String userKey;
-    @SerializedName("user_name")
+    @SerializedName("userName")
     @Expose
     private String userName;
-    @SerializedName("user_photo_url")
+    @SerializedName("userPhotoUrl")
     @Expose
     private String userPhotoUrl;
 

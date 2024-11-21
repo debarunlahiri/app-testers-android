@@ -6,40 +6,40 @@ import com.google.gson.annotations.SerializedName;
 
 public class UserAppsResponse {
 
-    @SerializedName("app_app_link")
+    @SerializedName("appAppLink")
     @Expose
     private String appAppLink;
-    @SerializedName("app_created_by")
+    @SerializedName("appCreatedBy")
     @Expose
     private Integer appCreatedBy;
     @SerializedName("app_created_on")
     @Expose
     private String appCreatedOn;
-    @SerializedName("app_dev_name")
+    @SerializedName("appDevName")
     @Expose
     private String appDevName;
-    @SerializedName("app_id")
+    @SerializedName("appId")
     @Expose
     private Integer appId;
-    @SerializedName("app_logo")
+    @SerializedName("appLogo")
     @Expose
     private String appLogo;
-    @SerializedName("app_name")
+    @SerializedName("appName")
     @Expose
     private String appName;
-    @SerializedName("app_pkg_nme")
+    @SerializedName("appPkgNme")
     @Expose
     private String appPkgNme;
-    @SerializedName("app_web_link")
+    @SerializedName("appWebLink")
     @Expose
     private String appWebLink;
-    @SerializedName("use_flag")
+    @SerializedName("useFlag")
     @Expose
     private Boolean useFlag;
-    @SerializedName("app_desc")
+    @SerializedName("appDesc")
     @Expose
     private String appDesc;
-    @SerializedName("app_credit")
+    @SerializedName("appCredit")
     @Expose
     private Integer appCredit;
 

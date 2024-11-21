@@ -1,7 +1,9 @@
 package com.summitcodeworks.apptesters.activities
 
+import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -9,7 +11,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -104,6 +108,9 @@ class LoginActivity : AppCompatActivity() {
         viewBinding.bGoogleSignIn.setOnClickListener {
             signInWithGoogle()
         }
+
+
+        checkPermissions()
     }
 
     private fun loginWithEmailPassword() {
@@ -219,6 +226,51 @@ class LoginActivity : AppCompatActivity() {
                 }
             })
         }
+    }
+
+    private fun checkPermissions() {
+        val permissions = mutableListOf<String>()
+
+        // Check notification permission
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                permissions.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+
+        // Check file permissions
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        }
+
+        // Request permissions if not granted
+        if (permissions.isNotEmpty()) {
+            requestPermissions(permissions.toTypedArray())
+        } else {
+            // All permissions are already granted
+            // You can proceed with notifications and file access
+        }
+    }
+
+    private fun requestPermissions(permissions: Array<String>) {
+        // ActivityResultLauncher for permission request
+        val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { results ->
+            results.forEach { (permission, isGranted) ->
+                if (isGranted) {
+                    // Permission granted
+                    // Handle permission granted logic
+                } else {
+                    // Permission denied
+                    // Handle permission denied logic
+                }
+            }
+        }
+
+        // Launch the permission request
+        requestPermissionLauncher.launch(permissions)
     }
 
 

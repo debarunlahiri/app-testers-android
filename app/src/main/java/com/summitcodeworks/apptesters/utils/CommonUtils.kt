@@ -1,12 +1,14 @@
 package com.summitcodeworks.apptesters.utils
 
 import android.content.Context
+import android.content.Intent
 import android.graphics.Typeface
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.Log
 import android.widget.Toast
+import com.summitcodeworks.apptesters.activities.ErrorActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
@@ -104,6 +106,7 @@ class CommonUtils {
                 override fun onFailure(call: Call<UserDetails>, t: Throwable) {
                     apiRequestFailedToast(mContext, t)
                     callback.onFailure(t)
+                    sendToErrorActivity(mContext)
                 }
             })
         }
@@ -127,6 +130,11 @@ class CommonUtils {
                     apiRequestFailedToast(mContext, t)
                 }
             })
+        }
+
+        fun sendToErrorActivity(mContext: Context) {
+            val errorIntent = Intent(mContext, ErrorActivity::class.java)
+            mContext.startActivity(errorIntent)
         }
 
 

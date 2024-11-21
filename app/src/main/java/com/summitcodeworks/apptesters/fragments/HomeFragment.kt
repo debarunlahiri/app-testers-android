@@ -79,6 +79,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
         mContext = requireContext()
 
         viewBinding.ibSearchClear.visibility = View.INVISIBLE
+        viewBinding.tvHomeNoData.visibility = View.GONE
 
         homeAdapter = HomeAdapter(mContext, userAppsList, this@HomeFragment)
         linearLayoutManager = LinearLayoutManager(mContext)
@@ -169,6 +170,9 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
     }
 
     private fun fetchAppList(page: Int, perPage: Int) {
+        viewBinding.pbHome.visibility = View.VISIBLE
+        viewBinding.tvHomeNoData.visibility = View.GONE
+        viewBinding.llNoDataView.visibility = View.GONE
         isLoading = true
         authenticateUser()
         userAppsList.clear()
@@ -179,17 +183,27 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
             override fun onResponse(call: Call<UserApps>, response: Response<UserApps>) {
                 isLoading = false
                 if (response.isSuccessful) {
+                    viewBinding.pbHome.visibility = View.GONE
                     if (response.body()?.header?.responseCode == 200) {
                         response.body()?.response?.let { apps ->
                             userAppsList.addAll(apps)
                             homeAdapter.setUserAppList(userAppsList)
                             homeAdapter.notifyDataSetChanged()
+                            if (userAppsList.isEmpty()) {
+                                viewBinding.tvHomeNoData.visibility = View.GONE
+
+                            } else {
+                                viewBinding.tvHomeNoData.visibility = View.VISIBLE
+                            }
                         }
                     }
                 }
             }
 
             override fun onFailure(call: Call<UserApps>, t: Throwable) {
+                viewBinding.pbHome.visibility = View.GONE
+                viewBinding.tvHomeNoData.visibility = View.VISIBLE
+                viewBinding.tvHomeNoData.text = "There is a problem loading apps. Please try again later."
                 isLoading = false
                 Log.e(TAG, "Network request failed", t)
                 if (t is IOException) {
@@ -248,6 +262,7 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
 
             override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
                 CommonUtils.apiRequestFailedToast(mContext, p1)
+
             }
 
         })

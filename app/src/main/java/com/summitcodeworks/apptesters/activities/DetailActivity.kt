@@ -14,6 +14,7 @@ import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.Log
+import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -53,6 +54,7 @@ class DetailActivity : AppCompatActivity() {
         setContentView(viewBinding.root)
 
         mContext = this
+
 
         viewBinding.bDetailAppLink.setOnClickListener {
             checkAndLaunchApp(true)
@@ -139,26 +141,21 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun setupUI() {
-        // Set toolbar title
+        viewBinding.pbDetail.visibility = View.VISIBLE
         viewBinding.tbDetail.title = "App Details"
 
-        // Set the toolbar as the support action bar
         setSupportActionBar(viewBinding.tbDetail)
 
-        // Enable the "up" button (back arrow) on the toolbar
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
-        // Set the toolbar navigation click listener to close the activity when the back button is pressed
         viewBinding.tbDetail.setNavigationOnClickListener {
-            finish() // Closes the current activity and navigates back
+            finish()
         }
 
-        // Load the navigation icon (back arrow) from drawable and set it
         val navigationIcon = ContextCompat.getDrawable(this, R.drawable.baseline_arrow_back_24)
         viewBinding.tbDetail.setNavigationIcon(navigationIcon)
 
-        // Check for night mode and update toolbar text and icon colors accordingly
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         when (currentNightMode) {
             Configuration.UI_MODE_NIGHT_NO -> {
@@ -172,7 +169,6 @@ class DetailActivity : AppCompatActivity() {
         }
     }
 
-    // Helper function to apply tint to the navigation icon
     private fun tintNavigationIcon(icon: Drawable?, colorResId: Int) {
         icon?.let {
             val wrappedIcon = DrawableCompat.wrap(it)
@@ -185,6 +181,7 @@ class DetailActivity : AppCompatActivity() {
         RetrofitClient.apiInterface(mContext).getAppDetails(appId).enqueue(object : Callback<AppDetails> {
             override fun onResponse(call: Call<AppDetails>, response: Response<AppDetails>) {
                 if (response.isSuccessful) {
+                    hideProgress()
                     response.body()?.let { appDetails ->
                         populateDetails(appDetails.response)
                     }
@@ -194,6 +191,7 @@ class DetailActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<AppDetails>, t: Throwable) {
+                hideProgress()
                 CommonUtils.apiRequestFailedToast(mContext, t)
             }
         })
@@ -201,14 +199,13 @@ class DetailActivity : AppCompatActivity() {
 
     private fun populateDetails(appDetailsResponse: AppDetailsResponse) {
         this.appDetailsResponse = appDetailsResponse
-        // Check if the app logo is an SVG
         if (appDetailsResponse.appLogo.endsWith(".svg")) {
             loadSvg(appDetailsResponse.appLogo)
         } else {
             // Set app logo using Glide
             Glide.with(this)
                 .load(appDetailsResponse.appLogo)
-                .placeholder(R.mipmap.ic_launcher) // Placeholder image
+                .placeholder(R.mipmap.ic_launcher)
                 .into(viewBinding.ivAppLogo)
         }
 
@@ -227,11 +224,9 @@ class DetailActivity : AppCompatActivity() {
             viewBinding.avDevProfileImage.avatarInitials = appDetailsResponse.appDevName
         }
 
-        // Set posted on date with bold "Posted on"
         val postedOnText = "Posted on: ${CommonUtils.convertDate(appDetailsResponse.appCreatedOn)}"
         viewBinding.tvDetailPostedOn.text = applyBoldStyle("Posted on: ", postedOnText)
 
-        // Set credits with bold "Created by"
         val creditsText = "Credits: ${appDetailsResponse.appCredit}"
         viewBinding.tvDetailCredits.text = applyBoldStyle("Credits: ", creditsText)
 
@@ -323,8 +318,21 @@ class DetailActivity : AppCompatActivity() {
         return spannableString
     }
 
+    private fun showProgress() {
+        viewBinding.nsvDetail.visibility = View.GONE
+        viewBinding.bTestNow.visibility = View.GONE
+        viewBinding.pbDetail.visibility = View.VISIBLE
+    }
+
+    private fun hideProgress() {
+        viewBinding.nsvDetail.visibility = View.VISIBLE
+        viewBinding.bTestNow.visibility = View.VISIBLE
+        viewBinding.pbDetail.visibility = View.GONE
+    }
+
     override fun onResume() {
         super.onResume()
+        showProgress()
         appId = intent.getIntExtra("app_id", 0)
 
         setupUI()

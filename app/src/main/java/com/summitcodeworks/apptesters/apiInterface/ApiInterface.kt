@@ -19,13 +19,13 @@ import retrofit2.http.Query
 
 interface ApiInterface {
 
-    @POST("users/register-user")
+    @POST("api/users/register-user")
     fun registerUser(@Body userRequest: UserRequest): Call<ResponseHandler>
 
-    @POST("app/create-app")
+    @POST("api/app/create-app")
     fun createApp(@Body userAppRequest: UserAppRequest): Call<ResponseHandler>
 
-    @POST("users/authenticate")
+    @POST("api/users/authenticate")
     fun authenticateUser(): Call<UserDetails>
 
     @POST("api/stages")
@@ -36,24 +36,24 @@ interface ApiInterface {
     @GET("api/stages/user/{userId}/{appId}")
     fun getMarkStageByUserId(@Path("userId") userId: Int, @Path("appId") appId: Int): Call<MarkStage>
 
-    @GET("app/app-lists")
+    @GET("api/app/app-lists")
     fun getAppList(@Query("page") page: Int, @Query("per_page") perPage: Int): Call<UserApps>
 
-    @GET("app/app-detail/{appId}")
+    @GET("api/app/app-detail/{appId}")
     fun getAppDetails(@Path("appId") appId: Int): Call<AppDetails>
 
-    @GET("user/user-apps")
+    @GET("api/users/user-apps")
     fun getUserApps(): Call<UserApps>
 
-    @GET("users/user-tested-apps")
+    @GET("api/users/user-tested-apps")
     fun getUserTestedApps(): Call<UserApps>
 
-    @GET("app/search-apps")
+    @GET("api/app/search-apps")
     fun searchApps(@Query("app_name") app_name: String): Call<UserApps>
 
 
 
-    @PUT("users/add-credits/{userId}")
+    @PUT("api/users/add-credits/{userId}")
     fun addCredits(@Path("userId") userId: Int, @Body addCreditsRequest: AddCreditsRequest): Call<ResponseHandler>
 
 

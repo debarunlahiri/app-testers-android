@@ -3,14 +3,14 @@ package com.summitcodeworks.apptesters.models
 import com.google.gson.annotations.SerializedName
 
 data class UserAppRequest(
-    @SerializedName("app_name") private var _appName: String = "",
-    @SerializedName("app_dev_name") private var _appDevName: String = "",
-    @SerializedName("app_web_link") private var _appWebLink: String = "",
-    @SerializedName("app_app_link") private var _appLink: String = "",
-    @SerializedName("app_desc") private var _appDescription: String = "",
-    @SerializedName("app_logo") private var _appLogo: String = "",
-    @SerializedName("app_created_by") private var _userCreatedBy: String = "",
-    @SerializedName("app_credit") private var _appCredit: String = ""
+    @SerializedName("appName") private var _appName: String = "",
+    @SerializedName("appDevName") private var _appDevName: String = "",
+    @SerializedName("appWebLink") private var _appWebLink: String = "",
+    @SerializedName("appAppLink") private var _appLink: String = "",
+    @SerializedName("appDesc") private var _appDescription: String = "",
+    @SerializedName("appLogo") private var _appLogo: String = "",
+    @SerializedName("appCreatedBy") private var _userCreatedBy: String = "",
+    @SerializedName("appCredit") private var _appCredit: String = ""
 ) {
     var appName: String
         get() = _appName
