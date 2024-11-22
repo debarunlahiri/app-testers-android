@@ -140,7 +140,7 @@ class CommonUtils {
             RetrofitClient.apiInterface(mContext).getAppConstants(constantKey).enqueue(object : Callback<AppConstants> {
                 override fun onResponse(call: Call<AppConstants>, response: Response<AppConstants>) {
                     if (response.isSuccessful) {
-                        if (response.body().header.responseCode == 200) {
+                        if (response.body()?.header?.responseCode == 200) {
                             val appConstantsResponse = response.body()?.response
                             if (appConstantsResponse != null) {
                                 callback.onSuccess(appConstantsResponse)
