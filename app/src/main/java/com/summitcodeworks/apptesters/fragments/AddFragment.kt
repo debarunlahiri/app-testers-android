@@ -25,6 +25,7 @@ import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.StorageReference
 import com.google.firebase.storage.ktx.storage
 import com.summitcodeworks.apptesters.R
+import com.summitcodeworks.apptesters.activities.HelpActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
@@ -161,6 +162,11 @@ class AddFragment : Fragment() {
 
         viewBinding.tvPostAppRefresh.setOnClickListener {
             getUserCredits()
+        }
+
+        viewBinding.cvAddHelp.setOnClickListener {
+            val helpIntent = Intent(mContext, HelpActivity::class.java)
+            startActivity(helpIntent)
         }
 
 

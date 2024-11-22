@@ -12,7 +12,9 @@ import com.summitcodeworks.apptesters.activities.ErrorActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.apiInterface.AppConstantsCallback
 import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
+import com.summitcodeworks.apptesters.models.appConstants.AppConstants
 import com.summitcodeworks.apptesters.models.userDetails.UserDetails
 import retrofit2.Call
 import retrofit2.Callback
@@ -128,6 +130,36 @@ class CommonUtils {
 
                 override fun onFailure(call: Call<UserDetails>, t: Throwable) {
                     apiRequestFailedToast(mContext, t)
+                    sendToErrorActivity(mContext)
+                }
+            })
+        }
+
+
+        fun fetchAppConstant(mContext: Context, constantKey: String, callback: AppConstantsCallback) {
+            RetrofitClient.apiInterface(mContext).getAppConstants(constantKey).enqueue(object : Callback<AppConstants> {
+                override fun onResponse(call: Call<AppConstants>, response: Response<AppConstants>) {
+                    if (response.isSuccessful) {
+                        if (response.body().header.responseCode == 200) {
+                            val appConstantsResponse = response.body()?.response
+                            if (appConstantsResponse != null) {
+                                callback.onSuccess(appConstantsResponse)
+                            } else {
+                                callback.onError(response.code(), "User details are null")
+                            }
+                        }
+
+                    } else {
+                        Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
+                        Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
+                        callback.onError(response.code(), response.message())
+                    }
+                }
+
+                override fun onFailure(call: Call<AppConstants>, t: Throwable) {
+                    apiRequestFailedToast(mContext, t)
+                    callback.onFailure(t)
+                    sendToErrorActivity(mContext)
                 }
             })
         }

@@ -191,7 +191,6 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
                             homeAdapter.notifyDataSetChanged()
                             if (userAppsList.isEmpty()) {
                                 viewBinding.tvHomeNoData.visibility = View.GONE
-
                             } else {
                                 viewBinding.tvHomeNoData.visibility = View.VISIBLE
                             }

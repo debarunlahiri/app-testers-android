@@ -4,6 +4,7 @@ import com.summitcodeworks.apptesters.models.AddCreditsRequest
 import com.summitcodeworks.apptesters.models.MarkStageRequest
 import com.summitcodeworks.apptesters.models.UserAppRequest
 import com.summitcodeworks.apptesters.models.UserRequest
+import com.summitcodeworks.apptesters.models.appConstants.AppConstants
 import com.summitcodeworks.apptesters.models.appDetails.AppDetails
 import com.summitcodeworks.apptesters.models.markStage.MarkStage
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
@@ -50,6 +51,10 @@ interface ApiInterface {
 
     @GET("api/app/search-apps")
     fun searchApps(@Query("app_name") app_name: String): Call<UserApps>
+
+
+    @GET("api/constants/key/{key}")
+    fun getAppConstants(@Path("key") key: String): Call<AppConstants>
 
 
 
