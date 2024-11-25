@@ -14,6 +14,7 @@ import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.activities.LoginActivity
 import com.summitcodeworks.apptesters.activities.MyAppsActivity
 import com.summitcodeworks.apptesters.activities.SettingsActivity
+import com.summitcodeworks.apptesters.activities.SupportActivity
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.databinding.FragmentProfileBinding
 import com.summitcodeworks.apptesters.models.appDetails.AppDetails
@@ -95,6 +96,12 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(mContext, "Unable to open URL", Toast.LENGTH_SHORT).show()
             }
         }
+
+        viewBinding.llSupport.setOnClickListener {
+            val supportIntent = Intent(mContext, SupportActivity::class.java)
+            startActivity(supportIntent)
+        }
+
 
     }
 

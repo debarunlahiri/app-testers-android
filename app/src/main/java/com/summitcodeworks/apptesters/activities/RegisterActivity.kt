@@ -32,6 +32,7 @@ import com.summitcodeworks.apptesters.databinding.ActivityRegisterBinding
 import com.summitcodeworks.apptesters.models.UserRequest
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
 import com.summitcodeworks.apptesters.utils.CommonUtils
+import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import jp.wasabeef.glide.transformations.BlurTransformation
 
 class RegisterActivity : AppCompatActivity() {
@@ -110,7 +111,7 @@ class RegisterActivity : AppCompatActivity() {
             override fun onClick(widget: View) {
                 val intent = Intent(this@RegisterActivity, WebViewActivity::class.java)
                 intent.putExtra("webview_type", "terms")
-                intent.putExtra("url", getString(R.string.terms_url))
+                intent.putExtra("url", SharedPrefsManager.getTermsAndConditionsUrl(mContext))
                 startActivity(intent)
             }
         }
@@ -124,7 +125,7 @@ class RegisterActivity : AppCompatActivity() {
             override fun onClick(widget: View) {
                 val intent = Intent(this@RegisterActivity, WebViewActivity::class.java)
                 intent.putExtra("webview_type", "policy")
-                intent.putExtra("url", getString(R.string.policy_url))
+                intent.putExtra("url", SharedPrefsManager.getAppPolicyUrl(mContext))
                 startActivity(intent)
             }
         }

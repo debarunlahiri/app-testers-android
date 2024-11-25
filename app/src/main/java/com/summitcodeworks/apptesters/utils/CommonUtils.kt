@@ -108,7 +108,6 @@ class CommonUtils {
                 override fun onFailure(call: Call<UserDetails>, t: Throwable) {
                     apiRequestFailedToast(mContext, t)
                     callback.onFailure(t)
-                    sendToErrorActivity(mContext)
                 }
             })
         }
@@ -130,14 +129,13 @@ class CommonUtils {
 
                 override fun onFailure(call: Call<UserDetails>, t: Throwable) {
                     apiRequestFailedToast(mContext, t)
-                    sendToErrorActivity(mContext)
                 }
             })
         }
 
 
-        fun fetchAppConstant(mContext: Context, constantKey: String, callback: AppConstantsCallback) {
-            RetrofitClient.apiInterface(mContext).getAppConstants(constantKey).enqueue(object : Callback<AppConstants> {
+        fun fetchAppConstant(mContext: Context, appPkg: String, callback: AppConstantsCallback) {
+            RetrofitClient.apiInterface(mContext).getAppConstants(appPkg).enqueue(object : Callback<AppConstants> {
                 override fun onResponse(call: Call<AppConstants>, response: Response<AppConstants>) {
                     if (response.isSuccessful) {
                         if (response.body()?.header?.responseCode == 200) {

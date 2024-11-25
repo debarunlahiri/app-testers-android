@@ -8,7 +8,6 @@
     android:background="#F8F9FA"
     tools:context=".activities.ErrorActivity">
 
-    <!-- Error Icon -->
     <ImageView
         android:id="@+id/errorIcon"
         android:layout_width="100dp"
@@ -19,7 +18,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Error Message -->
     <TextView
         android:id="@+id/errorMessage"
         android:layout_width="0dp"
@@ -34,7 +32,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/errorIcon" />
 
-    <!-- Retry Button -->
     <Button
         android:id="@+id/retryButton"
         android:layout_width="wrap_content"
@@ -47,17 +44,5 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/errorMessage" />
 
-    <!-- Go Back Button -->
-    <Button
-        android:id="@+id/goBackButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:backgroundTint="#FF6200EE"
-        android:text="Go Back"
-        android:textColor="#FFFFFF"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/retryButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

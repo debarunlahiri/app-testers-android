@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.MenuItem
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +25,11 @@ import com.summitcodeworks.apptesters.databinding.ActivityMainBinding
 import com.summitcodeworks.apptesters.activities.LoginActivity // Import your LoginActivity
 import com.summitcodeworks.apptesters.adapter.ViewPagerAdapter
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.apiInterface.AppConstantsCallback
+import com.summitcodeworks.apptesters.models.appConstants.AppConstantsResponse
+import com.summitcodeworks.apptesters.utils.CommonUtils
 import com.summitcodeworks.apptesters.utils.SharedPrefsManager
+import javax.security.auth.callback.Callback
 
 class MainActivity : AppCompatActivity() {
 
@@ -104,6 +109,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showProgress() {
+        viewBinding.pbMain.visibility = View.VISIBLE
+        viewBinding.vpMain.visibility = View.GONE
+        viewBinding.bottomNavigationView.visibility = View.GONE
+    }
+
+    private fun hideProgress() {
+        viewBinding.pbMain.visibility = View.GONE
+        viewBinding.vpMain.visibility = View.VISIBLE
+        viewBinding.bottomNavigationView.visibility = View.VISIBLE
+    }
+
     private fun checkPermissions() {
         val permissions = mutableListOf<String>()
 
@@ -148,4 +165,34 @@ class MainActivity : AppCompatActivity() {
         // Launch the permission request
         requestPermissionLauncher.launch(permissions)
     }
+
+
+    override fun onResume() {
+        super.onResume()
+        showProgress()
+        CommonUtils.fetchAppConstant(mContext, packageName, object : AppConstantsCallback {
+            override fun onSuccess(appConstantsResponseList: List<AppConstantsResponse>) {
+                hideProgress()
+                for (appConstantsResponse in appConstantsResponseList)
+                    when (appConstantsResponse.constantKey) {
+                        "app_policy_url" ->  SharedPrefsManager.setAppPolicyUrl(mContext, appConstantsResponse.constantValue)
+                        "terms_and_conditions_url" -> SharedPrefsManager.setTermsAndConditionsUrl(mContext, appConstantsResponse.constantValue)
+                        "app_help_url" -> SharedPrefsManager.setSupportUrl(mContext, appConstantsResponse.constantValue)
+                    }
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String) {
+                hideProgress()
+            }
+
+            override fun onFailure(throwable: Throwable) {
+                hideProgress()
+
+            }
+
+        })
+    }
+
+
+
 }

@@ -1,6 +1,7 @@
 package com.summitcodeworks.apptesters.activities
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -26,6 +27,12 @@ class ErrorActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
+        }
+
+        viewBinding.retryButton.setOnClickListener {
+            val mainIntent = Intent(mContext, MainActivity::class.java)
+            startActivity(mainIntent)
+            finish()
         }
 
 

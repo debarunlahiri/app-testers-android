@@ -27,6 +27,7 @@ firebaseAnalytics = "22.1.2"
 firebaseCrashlytics = "19.2.0"
 googleFirebaseCrashlytics = "3.0.2"
 legacySupportV4 = "1.0.0"
+okhttpEventsource = "3.1.0"
 playServicesAuth = "21.2.0"
 renderscript = "1.2.0"
 retrofit = "2.11.0"
@@ -67,6 +68,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
+okhttp-eventsource = { module = "com.launchdarkly:okhttp-eventsource", version.ref = "okhttpEventsource" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }

@@ -15,6 +15,10 @@ object SharedPrefsManager {
     private const val KEY_USER_CREATION_DATE = "user_creation_date"
     private const val KEY_USE_FLAG = "use_flag"
     private const val KEY_USER_LOGGED_IN = "user_logged_in"
+    private const val APP_POLICY_URL = "app_policy_url"
+    private const val TERMS_AND_CONDITIONS_URL = "terms_and_conditions_url"
+    private const val SUPPORT_URL = "support_url"
+
 
     private fun getSharedPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
@@ -57,6 +61,37 @@ object SharedPrefsManager {
     fun clearUserDetails(context: Context) {
         val editor = getSharedPreferences(context).edit()
         editor.clear()
+        editor.apply()
+    }
+
+
+    fun getAppPolicyUrl(context: Context): String {
+        return getSharedPreferences(context).getString(APP_POLICY_URL, "") ?: ""
+    }
+
+    fun setAppPolicyUrl(context: Context, url: String) {
+        val editor = getSharedPreferences(context).edit()
+        editor.putString(APP_POLICY_URL, url)
+        editor.apply()
+    }
+
+    fun getTermsAndConditionsUrl(context: Context): String {
+        return getSharedPreferences(context).getString(TERMS_AND_CONDITIONS_URL, "") ?: ""
+    }
+
+    fun setTermsAndConditionsUrl(context: Context, url: String) {
+        val editor = getSharedPreferences(context).edit()
+        editor.putString(TERMS_AND_CONDITIONS_URL, url)
+        editor.apply()
+    }
+
+    fun getSupportUrl(context: Context): String {
+        return getSharedPreferences(context).getString(SUPPORT_URL, "") ?: ""
+    }
+
+    fun setSupportUrl(context: Context, url: String) {
+        val editor = getSharedPreferences(context).edit()
+        editor.putString(SUPPORT_URL, url)
         editor.apply()
     }
 }

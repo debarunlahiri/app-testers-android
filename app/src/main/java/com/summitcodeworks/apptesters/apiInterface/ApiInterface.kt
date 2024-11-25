@@ -1,7 +1,9 @@
 package com.summitcodeworks.apptesters.apiInterface
 
 import com.summitcodeworks.apptesters.models.AddCreditsRequest
+import com.summitcodeworks.apptesters.models.ChatMessage
 import com.summitcodeworks.apptesters.models.MarkStageRequest
+import com.summitcodeworks.apptesters.models.Role
 import com.summitcodeworks.apptesters.models.UserAppRequest
 import com.summitcodeworks.apptesters.models.UserRequest
 import com.summitcodeworks.apptesters.models.appConstants.AppConstants
@@ -53,8 +55,8 @@ interface ApiInterface {
     fun searchApps(@Query("app_name") app_name: String): Call<UserApps>
 
 
-    @GET("api/constants/key/{key}")
-    fun getAppConstants(@Path("key") key: String): Call<AppConstants>
+    @GET("api/constants/{app_pkg}")
+    fun getAppConstants(@Path("app_pkg") app_pkg: String): Call<AppConstants>
 
 
 
@@ -62,4 +64,39 @@ interface ApiInterface {
     fun addCredits(@Path("userId") userId: Int, @Body addCreditsRequest: AddCreditsRequest): Call<ResponseHandler>
 
 
+    @POST("api/chat/send")
+    fun sendMessage(@Body chatMessage: ChatMessage): Call<ChatMessage>
+
+    @GET("api/chat/messages")
+    fun getMessages(
+        @Query("senderId") senderId: Int,
+        @Query("receiverId") receiverId: Int,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): Call<List<ChatMessage>>
+
+    @POST("api/roles/save")
+    fun saveRole(@Body role: Role): Call<Role>
+
+    @GET("api/roles/list")
+    fun getRoles(
+        @Query("userId") userId: Int?,
+        @Query("appPkg") appPkg: String?,
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 10
+    ): Call<List<Role>>
+
+    @GET("api/roles/user/{userId}")
+    fun getRolesByUserId(@Path("userId") userId: Int): Call<List<Role>>
+
+    @GET("api/roles/role-detail")
+    fun getRolesByUserIdAndAppPkg(
+        @Query("userId") userId: Int,
+        @Query("appPkg") appPkg: String
+    ): Call<List<Role>>
+
+    @GET("api/roles/user-roles")
+    fun getRolesByAppPkg(
+        @Query("appPkg") appPkg: String
+    ): Call<List<Role>>
 }

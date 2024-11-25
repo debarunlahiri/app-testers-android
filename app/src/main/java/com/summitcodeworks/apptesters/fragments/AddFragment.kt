@@ -166,6 +166,7 @@ class AddFragment : Fragment() {
 
         viewBinding.cvAddHelp.setOnClickListener {
             val helpIntent = Intent(mContext, HelpActivity::class.java)
+            helpIntent.putExtra("support_url", SharedPrefsManager.getSupportUrl(mContext))
             startActivity(helpIntent)
         }
 

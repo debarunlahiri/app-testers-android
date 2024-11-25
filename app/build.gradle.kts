@@ -102,4 +102,9 @@ dependencies {
 
     implementation("com.google.android.gms:play-services-ads:23.4.0")
 
+    implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
+    implementation("org.java-websocket:Java-WebSocket:1.5.2")
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+
 }

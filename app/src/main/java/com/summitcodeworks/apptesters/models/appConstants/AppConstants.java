@@ -4,6 +4,8 @@ package com.summitcodeworks.apptesters.models.appConstants;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.List;
+
 public class AppConstants {
 
     @SerializedName("header")
@@ -11,7 +13,7 @@ public class AppConstants {
     private AppConstantsHeader appConstantsHeader;
     @SerializedName("response")
     @Expose
-    private AppConstantsResponse appConstantsResponse;
+    private List<AppConstantsResponse> appConstantsResponseList;
 
     public AppConstantsHeader getHeader() {
         return appConstantsHeader;
@@ -21,12 +23,12 @@ public class AppConstants {
         this.appConstantsHeader = appConstantsHeader;
     }
 
-    public AppConstantsResponse getResponse() {
-        return appConstantsResponse;
+    public List<AppConstantsResponse> getResponse() {
+        return appConstantsResponseList;
     }
 
-    public void setResponse(AppConstantsResponse appConstantsResponse) {
-        this.appConstantsResponse = appConstantsResponse;
+    public void setResponse(List<AppConstantsResponse> appConstantsResponseList) {
+        this.appConstantsResponseList = appConstantsResponseList;
     }
 
 }
