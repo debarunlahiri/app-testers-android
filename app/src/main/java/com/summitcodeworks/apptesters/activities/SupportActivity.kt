@@ -10,6 +10,7 @@ import android.provider.OpenableColumns
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.graphics.drawable.DrawableCompat
@@ -44,7 +45,7 @@ class SupportActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivitySupportBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -81,7 +82,11 @@ class SupportActivity : AppCompatActivity() {
                 if (file != null) {
                     this.file = file
                     viewBinding.ivScreenshot.visibility = View.VISIBLE
+                    viewBinding.cvScreenshot.visibility = View.VISIBLE
                     Glide.with(mContext).load(uri).into(viewBinding.ivScreenshot)
+                    viewBinding.bAttachScreenshot.text = "Change Screenshot"
+                } else {
+                    CommonUtils.showToastLong(mContext, "Failed to attach file")
                 }
             }
         }
@@ -96,20 +101,25 @@ class SupportActivity : AppCompatActivity() {
             val developerName = viewBinding.tieSupportDeveloperName.text.toString()
             val developerEmail = viewBinding.tieSupportDeveloperEmail.text.toString()
             if (message.isNotEmpty() && developerName.isNotEmpty() && developerEmail.isNotEmpty()) {
-//                getReceiverUserDetails(message, developerName, developerEmail)
-                sendEmailWithAttachment(
-                    recipient = "summitcodeworks@gmail.com",
-                    subject = "App Testers Support",
-                    body = message,
-                    attachment = file
-                )
+                if (::file.isInitialized && file != null) {
+                    sendEmailWithAttachment(
+                        recipient = "summitcodeworks@gmail.com",
+                        subject = "App Testers Bug Report",
+                        body = message,
+                        attachment = file
+                    )
+                } else {
+                    sendEmail(
+                        recipient = "summitcodeworks@gmail.com",
+                        subject = "App Testers Bug Report",
+                        body = message
+                    )
+                }
             } else {
                 CommonUtils.showToastLong(mContext, "Please fill all the fields")
                 hideProgressBar()
             }
-
         }
-
     }
 
     private fun copyUriToFile(uri: Uri): File? {
@@ -141,6 +151,27 @@ class SupportActivity : AppCompatActivity() {
             }
         }
         return name
+    }
+
+    private fun sendEmail(
+        recipient: String,
+        subject: String,
+        body: String
+    ) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "*/*"
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(recipient))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+
+        if (intent.resolveActivity(packageManager) != null) {
+            startActivity(Intent.createChooser(intent, "Choose an Email client"))
+            hideProgressBar()
+        } else {
+            println("No email apps available!")
+        }
     }
 
     private fun sendEmailWithAttachment(
@@ -206,6 +237,7 @@ class SupportActivity : AppCompatActivity() {
         }
 
         viewBinding.ivScreenshot.visibility = View.GONE
+        viewBinding.cvScreenshot.visibility = View.GONE
 
         hideProgressBar()
     }

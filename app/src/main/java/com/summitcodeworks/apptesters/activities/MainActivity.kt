@@ -48,9 +48,8 @@ class MainActivity : AppCompatActivity() {
         mContext = this
 
         // Enable dark mode based on system settings
-        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         // Initialize Firebase Auth
         auth = FirebaseAuth.getInstance()
 

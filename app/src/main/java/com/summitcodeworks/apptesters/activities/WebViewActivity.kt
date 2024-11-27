@@ -9,6 +9,7 @@ import android.webkit.WebSettings
 import android.webkit.WebViewClient
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
@@ -29,6 +30,7 @@ class WebViewActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->

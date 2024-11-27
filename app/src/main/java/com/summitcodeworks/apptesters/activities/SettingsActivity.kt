@@ -6,6 +6,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
@@ -30,6 +31,7 @@ class SettingsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivitySettingsBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)

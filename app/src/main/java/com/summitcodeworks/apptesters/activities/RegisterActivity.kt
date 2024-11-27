@@ -16,6 +16,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
@@ -46,7 +47,7 @@ class RegisterActivity : AppCompatActivity() {
         viewBinding = ActivityRegisterBinding.inflate(layoutInflater)
         enableEdgeToEdge() // Enable edge-to-edge display
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
 
         // Initialize Firebase Auth

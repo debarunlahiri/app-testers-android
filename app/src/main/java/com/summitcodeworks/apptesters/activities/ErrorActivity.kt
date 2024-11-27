@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.summitcodeworks.apptesters.R
@@ -21,7 +22,7 @@ class ErrorActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityErrorBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this@ErrorActivity
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())

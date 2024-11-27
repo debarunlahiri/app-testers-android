@@ -8,21 +8,27 @@
     android:background="#F8F9FA"
     tools:context=".activities.ErrorActivity">
 
-    <ImageView
-        android:id="@+id/errorIcon"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/animation_view"
+        android:layout_width="0dp"
+        android:layout_height="250dp"
         android:layout_marginTop="100dp"
-        android:src="@drawable/baseline_error_outline_24"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/server_error"/>
+
 
     <TextView
         android:id="@+id/errorMessage"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:fontFamily="sans-serif-medium"
         android:gravity="center"
         android:padding="16dp"
         android:text="Something went wrong. Please try again."
@@ -30,7 +36,7 @@
         android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/errorIcon" />
+        app:layout_constraintTop_toBottomOf="@id/animation_view" />
 
     <Button
         android:id="@+id/retryButton"

@@ -106,5 +106,7 @@ dependencies {
     implementation("org.java-websocket:Java-WebSocket:1.5.2")
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
+    implementation("com.airbnb.android:lottie:6.6.0")
+
 
 }

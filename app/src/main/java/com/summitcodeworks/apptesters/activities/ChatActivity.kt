@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
@@ -46,7 +47,7 @@ class ChatActivity : AppCompatActivity(), ChatAdapter.OnChatAdapterListener {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityChatBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
         receiverId = intent.getIntExtra("receiver_id", 0)
 

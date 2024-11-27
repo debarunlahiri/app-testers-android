@@ -18,6 +18,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import com.bumptech.glide.Glide
@@ -52,7 +53,7 @@ class DetailActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
 
 

@@ -8,6 +8,7 @@ import android.text.Spanned
 import android.text.style.StyleSpan
 import android.util.Log
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 import com.summitcodeworks.apptesters.activities.ErrorActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG

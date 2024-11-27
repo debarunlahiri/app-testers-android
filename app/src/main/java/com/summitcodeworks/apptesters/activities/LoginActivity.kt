@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import com.bumptech.glide.Glide
@@ -59,7 +60,7 @@ class LoginActivity : AppCompatActivity() {
         viewBinding = ActivityLoginBinding.inflate(layoutInflater)
         enableEdgeToEdge() // Enable edge-to-edge display
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
 
 

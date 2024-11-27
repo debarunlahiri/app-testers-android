@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
@@ -37,7 +38,7 @@ class MyAppsActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityMyAppsBinding.inflate(layoutInflater)
         setContentView(viewBinding.root)
-
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this
 
         setupUI()
