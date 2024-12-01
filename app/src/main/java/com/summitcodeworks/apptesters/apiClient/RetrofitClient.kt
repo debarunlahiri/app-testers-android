@@ -34,7 +34,7 @@ object RetrofitClient {
 
     private fun getRetrofitInstance(context: Context): Retrofit {
         val client = OkHttpClient.Builder()
-//            .addInterceptor(ChuckerInterceptor(context))
+            .addInterceptor(ChuckerInterceptor(context))
             .addInterceptor { chain ->
                 val originalRequest: Request = chain.request()
                 val newRequest: Request = originalRequest.newBuilder()

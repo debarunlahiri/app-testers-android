@@ -130,34 +130,38 @@ class AddFragment : Fragment() {
         }
 
         viewBinding.bPostApp.setOnClickListener {
-            if (currentUser.isEmailVerified) {
-                viewBinding.pbPostAppProgressBar.visibility = View.VISIBLE
-                viewBinding.bPostApp.visibility = View.GONE
+            if (!SharedPrefsManager.getGroupPopup(mContext)) {
+                CommonUtils.showJoinGroupDialog(mContext)
+                return@setOnClickListener
+            } else {
+                if (currentUser.isEmailVerified) {
+                    viewBinding.pbPostAppProgressBar.visibility = View.VISIBLE
+                    viewBinding.bPostApp.visibility = View.GONE
 
-                val appName = viewBinding.tiePostAppName.text.toString()
-                val appDescription = viewBinding.tiePostAppDescription.text.toString()
-                val appLink = viewBinding.tiePostAppLink.text.toString()
-                val appLogo = selectedImageUri
-                val appDevName = viewBinding.tiePostAppDevName.text.toString()
+                    val appName = viewBinding.tiePostAppName.text.toString()
+                    val appDescription = viewBinding.tiePostAppDescription.text.toString()
+                    val appLink = viewBinding.tiePostAppLink.text.toString()
+                    val appLogo = selectedImageUri
+                    val appDevName = viewBinding.tiePostAppDevName.text.toString()
 
-                if (appName.isNotEmpty() && appDescription.isNotEmpty() && appLink.isNotEmpty() && appLogo != null && appDevName.isNotEmpty()) {
-                    if (Patterns.WEB_URL.matcher(appLink).matches() && appLink.contains("id=") && appLink.contains("com.")) {
-                        val userAppRequest = UserAppRequest()
-                        uploadImageToFirebase(appLogo, storageRef, userAppRequest)
+                    if (appName.isNotEmpty() && appDescription.isNotEmpty() && appLink.isNotEmpty() && appLogo != null && appDevName.isNotEmpty()) {
+                        if (Patterns.WEB_URL.matcher(appLink).matches() && appLink.contains("id=") && appLink.contains("com.")) {
+                            val userAppRequest = UserAppRequest()
+                            uploadImageToFirebase(appLogo, storageRef, userAppRequest)
+                        } else {
+                            Toast.makeText(mContext, "Please enter a valid URL with an Android package name", Toast.LENGTH_SHORT).show()
+                            viewBinding.pbPostAppProgressBar.visibility = View.GONE
+                            viewBinding.bPostApp.visibility = View.VISIBLE
+                        }
                     } else {
-                        Toast.makeText(mContext, "Please enter a valid URL with an Android package name", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(mContext, "Please fill in all fields", Toast.LENGTH_SHORT).show()
                         viewBinding.pbPostAppProgressBar.visibility = View.GONE
                         viewBinding.bPostApp.visibility = View.VISIBLE
                     }
                 } else {
-                    Toast.makeText(mContext, "Please fill in all fields", Toast.LENGTH_SHORT).show()
-                    viewBinding.pbPostAppProgressBar.visibility = View.GONE
-                    viewBinding.bPostApp.visibility = View.VISIBLE
+                    CommonUtils.showToastLong(mContext, "Please verify your e-mail first")
                 }
-            } else {
-                CommonUtils.showToastLong(mContext, "Please verify your e-mail first")
             }
-
         }
 
         viewBinding.tvPostAppRefresh.setOnClickListener {
@@ -174,6 +178,7 @@ class AddFragment : Fragment() {
         viewBinding.tiePostAppDevName.setText(SharedPrefsManager.getUserDetails(mContext).userName)
         viewBinding.tiePostAppDevName.isEnabled = false
     }
+
 
     private fun getUserCredits() {
         CommonUtils.authenticateUser(mContext, object : AuthenticationCallback {

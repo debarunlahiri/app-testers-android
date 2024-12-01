@@ -46,6 +46,8 @@ class MainActivity : AppCompatActivity() {
         viewBinding = ActivityMainBinding.inflate(layoutInflater)
 
         mContext = this
+        CommonUtils.appContext = mContext
+
 
         // Enable dark mode based on system settings
         setContentView(viewBinding.root)

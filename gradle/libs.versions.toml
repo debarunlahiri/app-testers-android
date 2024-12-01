@@ -6,6 +6,13 @@ circleimageview = "3.1.0"
 converterGson = "2.11.0"
 glide = "4.14.2"
 glideTransformations = "4.3.0"
+googleApiClient = "1.34.0"
+googleApiClientAndroid = "2.2.0"
+googleApiServicesAdminDirectory = "directory_v1-rev20230828-2.0.0"
+googleApiServicesAdminDirectoryVersion = "directory_v1-rev20230325-1.34.0"
+googleApiServicesGroupssettings = "v1-rev20230612-2.0.0"
+googleApiServicesGroupssettingsVersion = "v1-rev20230325-1.34.0"
+googleOauthClientJetty = "1.34.1"
 kotlin = "1.9.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -17,7 +24,8 @@ lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
 composeBom = "2024.04.01"
 appcompat = "1.7.0"
-lottie = "6.5.2"
+loggingInterceptor = "4.11.0"
+lottie = "6.6.0"
 material = "1.12.0"
 activity = "1.9.2"
 constraintlayout = "2.1.4"
@@ -28,6 +36,7 @@ firebaseCrashlytics = "19.2.0"
 googleFirebaseCrashlytics = "3.0.2"
 legacySupportV4 = "1.0.0"
 okhttpEventsource = "3.1.0"
+playServicesAds = "23.4.0"
 playServicesAuth = "21.2.0"
 renderscript = "1.2.0"
 retrofit = "2.11.0"
@@ -44,6 +53,13 @@ circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circ
 converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "converterGson" }
 glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
 glide-transformations = { module = "jp.wasabeef:glide-transformations", version.ref = "glideTransformations" }
+google-api-client = { module = "com.google.api-client:google-api-client", version.ref = "googleApiClient" }
+google-api-client-android = { module = "com.google.api-client:google-api-client-android", version.ref = "googleApiClientAndroid" }
+google-api-services-admin-directory = { module = "com.google.apis:google-api-services-admin-directory", version.ref = "googleApiServicesAdminDirectory" }
+google-api-services-admin-directory-vdirectoryv1rev202303251340 = { module = "com.google.apis:google-api-services-admin-directory", version.ref = "googleApiServicesAdminDirectoryVersion" }
+google-api-services-groupssettings = { module = "com.google.apis:google-api-services-groupssettings", version.ref = "googleApiServicesGroupssettings" }
+google-api-services-groupssettings-vv1rev202303251340 = { module = "com.google.apis:google-api-services-groupssettings", version.ref = "googleApiServicesGroupssettingsVersion" }
+google-oauth-client-jetty = { module = "com.google.oauth-client:google-oauth-client-jetty", version.ref = "googleOauthClientJetty" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -60,6 +76,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 library = { module = "com.github.chuckerteam.chucker:library", version.ref = "library" }
 library-no-op = { module = "com.github.chuckerteam.chucker:library-no-op", version.ref = "libraryNoOp" }
+logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "loggingInterceptor" }
 lottie = { module = "com.airbnb.android:lottie", version.ref = "lottie" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
@@ -69,6 +86,7 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics", version.ref = "firebaseCrashlytics" }
 androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support-v4", version.ref = "legacySupportV4" }
 okhttp-eventsource = { module = "com.launchdarkly:okhttp-eventsource", version.ref = "okhttpEventsource" }
+play-services-ads = { module = "com.google.android.gms:play-services-ads", version.ref = "playServicesAds" }
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx", version.ref = "firebaseStorageKtx" }

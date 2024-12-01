@@ -13,8 +13,8 @@ android {
         applicationId = "com.summitcodeworks.apptesters"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -51,6 +51,15 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes.add("META-INF/DEPENDENCIES")
+            excludes.add("META-INF/LICENSE")
+            excludes.add("META-INF/LICENSE.txt")
+            excludes.add("META-INF/license.txt")
+            excludes.add("META-INF/NOTICE")
+            excludes.add("META-INF/NOTICE.txt")
+            excludes.add("META-INF/notice.txt")
+            excludes.add("META-INF/ASL2.0")
+            excludes.add("META-INF/*.kotlin_module")
         }
     }
 }
@@ -83,6 +92,7 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
     implementation(libs.play.services.auth)
     implementation(libs.androidx.swiperefreshlayout)
+    implementation("com.google.api-client:google-api-client-android:2.2.0")
 
     implementation(libs.lottie)
 
@@ -92,6 +102,8 @@ dependencies {
 
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
+
 
     implementation(libs.avatarview.coil)
 
@@ -100,13 +112,9 @@ dependencies {
 
     implementation(libs.avatarview.coil)
 
-    implementation("com.google.android.gms:play-services-ads:23.4.0")
+    implementation(libs.play.services.ads)
 
-    implementation("com.github.NaikSoftware:StompProtocolAndroid:1.6.6")
-    implementation("org.java-websocket:Java-WebSocket:1.5.2")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
-    implementation("com.airbnb.android:lottie:6.6.0")
 
 
 }

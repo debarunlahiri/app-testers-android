@@ -18,6 +18,7 @@ object SharedPrefsManager {
     private const val APP_POLICY_URL = "app_policy_url"
     private const val TERMS_AND_CONDITIONS_URL = "terms_and_conditions_url"
     private const val SUPPORT_URL = "support_url"
+    private const val GROUP_POPUP = "group_popup"
 
 
     private fun getSharedPreferences(context: Context): SharedPreferences {
@@ -92,6 +93,16 @@ object SharedPrefsManager {
     fun setSupportUrl(context: Context, url: String) {
         val editor = getSharedPreferences(context).edit()
         editor.putString(SUPPORT_URL, url)
+        editor.apply()
+    }
+
+    fun getGroupPopup(context: Context): Boolean {
+        return getSharedPreferences(context).getBoolean(GROUP_POPUP, false)
+    }
+
+    fun setGroupPopup(context: Context, value: Boolean) {
+        val editor = getSharedPreferences(context).edit()
+        editor.putBoolean(GROUP_POPUP, value)
         editor.apply()
     }
 }

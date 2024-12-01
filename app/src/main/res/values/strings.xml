@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">App Testers</string>
-    <string name="default_web_client_id">383256755764-nmjdhq1m7mf459b4jnlsl03cs55jceh8.apps.googleusercontent.com</string>
+<!--    <string name="default_web_client_id">383256755764-nmjdhq1m7mf459b4jnlsl03cs55jceh8.apps.googleusercontent.com</string>-->
+    <string name="default_web_client_id">383256755764-dh078v8r0ks0p48kofhvg84ho23n24qi.apps.googleusercontent.com</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="install_app">Install App</string>
