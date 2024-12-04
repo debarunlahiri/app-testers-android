@@ -45,7 +45,6 @@ class RegisterActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewBinding = ActivityRegisterBinding.inflate(layoutInflater)
-        enableEdgeToEdge() // Enable edge-to-edge display
         setContentView(viewBinding.root)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
         mContext = this

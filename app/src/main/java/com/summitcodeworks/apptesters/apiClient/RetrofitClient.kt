@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object RetrofitClient {
 
-    public const val PROD_BASE_URL = "https://apptesters-backend.onrender.com"
+    const val PROD_BASE_URL = "https://apptesters-backend.onrender.com"
     private const val DEV_BASE_URL = "http://192.168.0.36:8082/"
 
     enum class Environment {
@@ -34,7 +34,7 @@ object RetrofitClient {
 
     private fun getRetrofitInstance(context: Context): Retrofit {
         val client = OkHttpClient.Builder()
-            .addInterceptor(ChuckerInterceptor(context))
+//            .addInterceptor(ChuckerInterceptor(context))
             .addInterceptor { chain ->
                 val originalRequest: Request = chain.request()
                 val newRequest: Request = originalRequest.newBuilder()

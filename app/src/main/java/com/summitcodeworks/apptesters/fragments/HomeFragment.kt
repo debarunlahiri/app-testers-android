@@ -240,31 +240,39 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
 
 
     private fun authenticateUser() {
-        RetrofitClient.apiInterface(mContext).authenticateUser().enqueue(object : Callback<UserDetails> {
-            override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
-                if (response.isSuccessful) {
-                    val userDetails = response.body()?.response
-                    if (userDetails != null) {
-                        SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
-                        val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
-                        viewBinding.tvUserCredits.text = SharedPrefsManager.getUserDetails(mContext).userCredits.toString()
+        if (requireContext() != null) {
+            RetrofitClient.apiInterface(mContext).authenticateUser().enqueue(object : Callback<UserDetails> {
+                override fun onResponse(call: Call<UserDetails>, response: Response<UserDetails>) {
+                    if (isAdded) {
+                        if (response.isSuccessful) {
+                            val userDetails = response.body()?.response
+                            if (userDetails != null) {
+                                SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
+                                val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
+                                viewBinding.tvUserCredits.text = SharedPrefsManager.getUserDetails(mContext).userCredits.toString()
 
-                    } else {
-                        Log.e(TAG, "User details are null")
-                        Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
+                            } else {
+                                Log.e(TAG, "User details are null")
+                                Toast.makeText(requireContext(), "User details are null", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
+                            Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
+                        }
                     }
-                } else {
-                    Log.e(TAG, "Login failed with code: ${response.code()} - ${response.message()}")
-                    Log.e(TAG, "Response body: ${response.errorBody()?.string()}")
+
                 }
-            }
 
-            override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
-                CommonUtils.apiRequestFailedToast(mContext, p1)
+                override fun onFailure(p0: Call<UserDetails>, p1: Throwable) {
+                    if (isAdded) {
+                        CommonUtils.apiRequestFailedToast(mContext, p1)
 
-            }
+                    }
+                }
 
-        })
+            })
+        }
+
     }
 
 

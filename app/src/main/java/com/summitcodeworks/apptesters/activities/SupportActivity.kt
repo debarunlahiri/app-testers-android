@@ -32,6 +32,18 @@ import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
+import com.google.api.client.json.JsonFactory
+import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.gmail.Gmail
+import com.google.api.services.gmail.model.Message
+import java.util.*
+import javax.mail.Session
+import javax.mail.internet.InternetAddress
+import javax.mail.internet.MimeMessage
+import kotlin.io.path.Path
+import android.util.Base64
 
 class SupportActivity : AppCompatActivity() {
 
@@ -40,6 +52,8 @@ class SupportActivity : AppCompatActivity() {
     private lateinit var viewBinding: ActivitySupportBinding
 
     private lateinit var file: File
+
+    private val JSON_FACTORY: JsonFactory = JacksonFactory.getDefaultInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,6 +115,12 @@ class SupportActivity : AppCompatActivity() {
             val developerName = viewBinding.tieSupportDeveloperName.text.toString()
             val developerEmail = viewBinding.tieSupportDeveloperEmail.text.toString()
             if (message.isNotEmpty() && developerName.isNotEmpty() && developerEmail.isNotEmpty()) {
+//                val credentialsStream = applicationContext.assets.open("credentials.json")
+//                val credentials = GoogleCredential.fromStream(credentialsStream)
+//                    .createScoped(listOf("https://www.googleapis.com/auth/gmail.send"))
+//
+//                sendEmailWithGmailAPI(getString(R.string.support_email), "App Testers Bug Report", message, "credentials.json")
+
                 if (::file.isInitialized && file != null) {
                     sendEmailWithAttachment(
                         recipient = "summitcodeworks@gmail.com",
@@ -164,15 +184,19 @@ class SupportActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_SUBJECT, subject)
             putExtra(Intent.EXTRA_TEXT, body)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            // Explicitly set Gmail as the email app
+            setPackage("com.google.android.gm")
         }
 
         if (intent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(intent, "Choose an Email client"))
+            startActivity(intent)
             hideProgressBar()
         } else {
-            println("No email apps available!")
+            println("Gmail app is not installed!")
         }
     }
+
 
     private fun sendEmailWithAttachment(
         recipient: String,
@@ -198,13 +222,62 @@ class SupportActivity : AppCompatActivity() {
             putExtra(Intent.EXTRA_TEXT, body)
             putExtra(Intent.EXTRA_STREAM, attachmentUri)
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            // Explicitly set Gmail as the email app
+            setPackage("com.google.android.gm")
         }
 
         if (intent.resolveActivity(packageManager) != null) {
-            startActivity(Intent.createChooser(intent, "Choose an Email client"))
+            startActivity(intent)
             hideProgressBar()
         } else {
-            println("No email apps available!")
+            println("Gmail app is not installed!")
+        }
+    }
+
+
+    fun getGmailService(credentialsPath: String): Gmail {
+        val httpTransport = GoogleNetHttpTransport.newTrustedTransport()
+
+        // Load credentials from the credentials.json file
+        val credentials = GoogleCredential.fromStream(File(credentialsPath).inputStream())
+            .createScoped(listOf("https://www.googleapis.com/auth/gmail.send"))
+
+        return Gmail.Builder(httpTransport, JSON_FACTORY, credentials)
+            .setApplicationName(getString(R.string.app_name))
+            .build()
+    }
+
+    fun sendEmailWithGmailAPI(
+        recipient: String,
+        subject: String,
+        body: String,
+        credentialsPath: String
+    ) {
+        try {
+            val gmailService = getGmailService(credentialsPath)
+
+            // Create the email content
+            val session = Session.getDefaultInstance(Properties(), null)
+            val email = MimeMessage(session).apply {
+                setFrom(InternetAddress(SharedPrefsManager.getUserDetails(mContext).userEmail))
+                setRecipient(javax.mail.Message.RecipientType.TO, InternetAddress(recipient))
+                setSubject(subject)
+                setText(body)
+            }
+
+            // Encode the email into base64url
+            val encodedEmail = Base64.encodeToString(email.toString().toByteArray(), Base64.URL_SAFE or Base64.NO_WRAP)
+
+
+            // Create and send the message
+            val message = Message().setRaw(encodedEmail)
+            gmailService.users().messages().send("me", message).execute()
+
+            println("Email sent successfully!")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            println("Failed to send email: ${e.message}")
         }
     }
 

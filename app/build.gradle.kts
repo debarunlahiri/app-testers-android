@@ -13,8 +13,8 @@ android {
         applicationId = "com.summitcodeworks.apptesters"
         minSdk = 24
         targetSdk = 34
-        versionCode = 2
-        versionName = "1.0.1"
+        versionCode = 3
+        versionName = "1.0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -113,6 +113,14 @@ dependencies {
     implementation(libs.avatarview.coil)
 
     implementation(libs.play.services.ads)
+
+    implementation("com.sun.mail:android-mail:1.6.2")
+    implementation("com.sun.mail:android-activation:1.6.2")
+    implementation("com.google.api-client:google-api-client:1.34.0")
+    implementation("com.google.api-client:google-api-client-android:1.34.0")
+    implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
+    implementation("com.google.apis:google-api-services-gmail:v1-rev110-1.25.0")
+    implementation("com.google.http-client:google-http-client-jackson2:1.34.0")
 
 
 

@@ -17,7 +17,7 @@ object GoogleRetrofitClient {
 
     private val client = OkHttpClient.Builder()
         .addInterceptor(loggingInterceptor)
-        .addInterceptor(ChuckerInterceptor(CommonUtils.appContext))
+//        .addInterceptor(ChuckerInterceptor(CommonUtils.appContext))
         .build()
 
     val instance: GoogleApiInterface by lazy {

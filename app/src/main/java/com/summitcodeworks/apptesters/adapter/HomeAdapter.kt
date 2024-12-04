@@ -6,11 +6,13 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.transform.CircleCropTransformation
 import com.bumptech.glide.Glide
 import com.caverock.androidsvg.SVG
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.databinding.ItemListAppLayoutBinding
 import com.summitcodeworks.apptesters.models.userApps.UserAppsResponse
+import io.getstream.avatarview.coil.loadImage
 import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
@@ -39,10 +41,12 @@ class HomeAdapter(
             if (userApp.appLogo.endsWith(".svg")) {
                 loadSvg(userApp.appLogo)
             } else {
+                binding.avAppLogo.avatarInitials = userApp.appName
                 Glide.with(binding.root.context)
                     .load(userApp.appLogo)
-                    .placeholder(R.mipmap.ic_launcher) // Optional placeholder
-                    .into(binding.ivAppLogo)
+                    .placeholder(R.mipmap.ic_launcher)
+                    .error(binding.avAppLogo.avatarInitials) // Optional placeholder
+                    .into(binding.avAppLogo)
             }
             binding.cvHomeApp.setOnClickListener {
                 onHomeAdapterListener.onHomeAdapterClick(userApp)
@@ -64,8 +68,8 @@ class HomeAdapter(
                     val drawable = PictureDrawable(svg.renderToPicture())
 
                     // Update UI on the main thread
-                    binding.ivAppLogo.post {
-                        binding.ivAppLogo.setImageDrawable(drawable)
+                    binding.avAppLogo.post {
+                        binding.avAppLogo.setImageDrawable(drawable)
                     }
                 } catch (e: Exception) {
                     Log.e("HomeAdapter", "Error loading SVG: ${e.message}")

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Common color names for the app (light mode) -->
-    <color name="colorPrimary">#6750A4</color>
+    <color name="colorPrimary">#24487f</color>
     <color name="colorPrimaryContainer">#EADDFF</color>
     <color name="colorSecondary">#625B71</color>
     <color name="colorOnPrimary">#FFFFFF</color>
@@ -11,4 +11,6 @@
     <color name="colorWhite">#FFFFFF</color> <!-- Black for light mode -->
     <color name="grey">#D3D3D3</color>
     <color name="darkGrey">#4A4A4A</color> <!-- Dark grey for light mode -->
+
+    <color name="colorBackgroundGray">#F0F4F8</color>
 </resources>

@@ -9,4 +9,6 @@
     <color name="colorText">#FFFFFF</color>
     <color name="colorWhite">#FFFFFF</color> <!-- White for dark mode -->
     <color name="darkGrey">#A9A9A9</color> <!-- Dark grey for dark mode -->
+
+    <color name="colorBackgroundGray">#F0F4F8</color>
 </resources>
