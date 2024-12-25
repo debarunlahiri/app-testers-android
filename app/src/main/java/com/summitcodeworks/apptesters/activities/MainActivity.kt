@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
         CommonUtils.appContext = mContext
 
 
+
         // Enable dark mode based on system settings
         setContentView(viewBinding.root)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)

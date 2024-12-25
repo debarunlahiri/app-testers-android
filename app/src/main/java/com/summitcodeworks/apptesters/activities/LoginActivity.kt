@@ -32,9 +32,11 @@ import com.google.firebase.auth.FirebaseUser
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
 import com.summitcodeworks.apptesters.apiClient.RetrofitClient
+import com.summitcodeworks.apptesters.apiInterface.AppConstantsCallback
 import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
 import com.summitcodeworks.apptesters.databinding.ActivityLoginBinding
 import com.summitcodeworks.apptesters.models.UserRequest
+import com.summitcodeworks.apptesters.models.appConstants.AppConstantsResponse
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
 import com.summitcodeworks.apptesters.models.userDetails.UserDetails
 import com.summitcodeworks.apptesters.models.userDetails.UserDetailsResponse
@@ -279,5 +281,26 @@ class LoginActivity : AppCompatActivity() {
         val mainIntent = Intent(this, MainActivity::class.java)
         startActivity(mainIntent)
         finishAffinity()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        CommonUtils.fetchAppConstant(mContext, packageName, object : AppConstantsCallback {
+            override fun onSuccess(appConstantsResponseList: List<AppConstantsResponse>) {
+                for (appConstantsResponse in appConstantsResponseList)
+                    when (appConstantsResponse.constantKey) {
+                        "app_policy_url" ->  SharedPrefsManager.setAppPolicyUrl(mContext, appConstantsResponse.constantValue)
+                        "terms_and_conditions_url" -> SharedPrefsManager.setTermsAndConditionsUrl(mContext, appConstantsResponse.constantValue)
+                        "app_help_url" -> SharedPrefsManager.setSupportUrl(mContext, appConstantsResponse.constantValue)
+                    }
+            }
+
+            override fun onError(errorCode: Int, errorMessage: String) {
+            }
+
+            override fun onFailure(throwable: Throwable) {
+            }
+
+        })
     }
 }

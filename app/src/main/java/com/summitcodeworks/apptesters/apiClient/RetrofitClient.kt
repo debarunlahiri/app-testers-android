@@ -18,7 +18,8 @@ object RetrofitClient {
     }
 
     // Set this to switch between environments
-    var currentEnvironment = Environment.PROD // Default to DEV
+    var currentEnvironment = Environment.DEV
+//    var currentEnvironment = Environment.PROD
     var API_KEY = "" // Replace this with your actual API key
 
     public val baseUrl: String
@@ -33,16 +34,29 @@ object RetrofitClient {
     }
 
     private fun getRetrofitInstance(context: Context): Retrofit {
-        val client = OkHttpClient.Builder()
-//            .addInterceptor(ChuckerInterceptor(context))
-            .addInterceptor { chain ->
-                val originalRequest: Request = chain.request()
-                val newRequest: Request = originalRequest.newBuilder()
-                    .header("api-key", API_KEY) // Add API key header
-                    .build()
-                chain.proceed(newRequest)
-            }
-            .build()
+        var client: OkHttpClient? = null
+        if (currentEnvironment == Environment.DEV) {
+            client = OkHttpClient.Builder()
+                .addInterceptor(ChuckerInterceptor(context))
+                .addInterceptor { chain ->
+                    val originalRequest: Request = chain.request()
+                    val newRequest: Request = originalRequest.newBuilder()
+                        .header("api-key", API_KEY) // Add API key header
+                        .build()
+                    chain.proceed(newRequest)
+                }
+                .build()
+        } else {
+            client = OkHttpClient.Builder()
+                .addInterceptor { chain ->
+                    val originalRequest: Request = chain.request()
+                    val newRequest: Request = originalRequest.newBuilder()
+                        .header("api-key", API_KEY) // Add API key header
+                        .build()
+                    chain.proceed(newRequest)
+                }
+                .build()
+        }
 
         return Retrofit.Builder()
             .baseUrl(baseUrl) // Use the selected base URL
