@@ -285,8 +285,15 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        CommonUtils.showToastLong(mContext, "Checking server status")
+        viewBinding.bLogin.isEnabled = false
+        viewBinding.bGoogleSignIn.isEnabled = false
+        viewBinding.bRegister.isEnabled = false
         CommonUtils.fetchAppConstant(mContext, packageName, object : AppConstantsCallback {
             override fun onSuccess(appConstantsResponseList: List<AppConstantsResponse>) {
+                viewBinding.bLogin.isEnabled = true
+                viewBinding.bGoogleSignIn.isEnabled = true
+                viewBinding.bRegister.isEnabled = true
                 for (appConstantsResponse in appConstantsResponseList)
                     when (appConstantsResponse.constantKey) {
                         "app_policy_url" ->  SharedPrefsManager.setAppPolicyUrl(mContext, appConstantsResponse.constantValue)
