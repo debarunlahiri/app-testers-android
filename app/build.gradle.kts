@@ -13,8 +13,8 @@ android {
         applicationId = "com.summitcodeworks.apptesters"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.0.4"
+        versionCode = 6
+        versionName = "1.0.5"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -121,6 +121,12 @@ dependencies {
     implementation("com.google.oauth-client:google-oauth-client-jetty:1.34.1")
     implementation("com.google.apis:google-api-services-gmail:v1-rev110-1.25.0")
     implementation("com.google.http-client:google-http-client-jackson2:1.34.0")
+
+
+    implementation("org.java-websocket:Java-WebSocket:1.5.3")
+    implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1")
 
 
 

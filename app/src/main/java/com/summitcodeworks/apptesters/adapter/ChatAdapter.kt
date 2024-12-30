@@ -26,17 +26,17 @@ class ChatAdapter(var mContext: Context, var chatList: List<ChatMessage>, var on
         RecyclerView.ViewHolder(binding.root) {
         fun bind(chatMessage: ChatMessage, onChatAdapterListener: OnChatAdapterListener) {
             // Bind your data to the views using binding
-            binding.tvChatMessage.text = chatMessage.chatMessage
-            binding.tvChatTime.text = chatMessage.chatTimestamp
-
-            if (chatMessage.chatSenderId == SharedPrefsManager.getUserDetails(binding.root.context).userId) {
-                binding.llChatMessage.gravity = GravityCompat.END
-            } else {
-                binding.llChatMessage.gravity = GravityCompat.START
-            }
-            binding.root.setOnClickListener {
-                onChatAdapterListener.onChatClick(chatMessage)
-            }
+//            binding.tvChatMessage.text = chatMessage.chatMessage
+//            binding.tvChatTime.text = chatMessage.chatTimestamp
+//
+//            if (chatMessage.chatSenderId == SharedPrefsManager.getUserDetails(binding.root.context).userId) {
+//                binding.llChatMessage.gravity = GravityCompat.END
+//            } else {
+//                binding.llChatMessage.gravity = GravityCompat.START
+//            }
+//            binding.root.setOnClickListener {
+//                onChatAdapterListener.onChatClick(chatMessage)
+//            }
         }
     }
 

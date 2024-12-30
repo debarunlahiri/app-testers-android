@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.widget.NestedScrollView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.summitcodeworks.apptesters.activities.CommunityActivity
 import com.summitcodeworks.apptesters.activities.CreditsActivity
 import com.summitcodeworks.apptesters.activities.DetailActivity
 import com.summitcodeworks.apptesters.activities.RegisterActivity.Companion.TAG
@@ -130,6 +131,11 @@ class HomeFragment : Fragment(), HomeAdapter.OnHomeAdapterListener {
         viewBinding.ibSearchClear.setOnClickListener {
             viewBinding.etHomeSearch.text.clear()
             fetchAppList(currentPage, itemsPerPage)
+        }
+
+        viewBinding.cvCommunity.setOnClickListener {
+            val communityIntent = Intent(mContext, CommunityActivity::class.java)
+            startActivity(communityIntent)
         }
 
         setupScrollListener()
