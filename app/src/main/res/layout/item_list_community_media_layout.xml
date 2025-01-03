@@ -6,7 +6,7 @@
     android:layout_height="70dp">
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/cardView4"
+        android:id="@+id/cvCommunityMedia"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
@@ -28,6 +28,7 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
+        android:id="@+id/cvCommunityMediaDelete"
         android:layout_width="20dp"
         android:layout_height="20dp"
         app:cardBackgroundColor="#E91E63"
@@ -36,13 +37,13 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageButton
-            android:id="@+id/imageButton"
+            android:id="@+id/ivCommunityMediaDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="6dp"
             android:background="@null"
             android:elevation="10dp"
-            android:tint="@color/colorWhite"
+            app:tint="@color/colorWhite"
             app:srcCompat="@drawable/baseline_close_24" />
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

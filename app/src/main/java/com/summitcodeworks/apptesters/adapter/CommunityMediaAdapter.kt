@@ -2,15 +2,13 @@ package com.summitcodeworks.apptesters.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.summitcodeworks.apptesters.databinding.ItemListChatLayoutBinding
 import com.summitcodeworks.apptesters.databinding.ItemListCommunityMediaLayoutBinding
 import com.summitcodeworks.apptesters.models.CommunityMedia
 
-class CommunityMediaAdapter(private val mContext: Context, private val communityMediaList: MutableList<CommunityMedia>): RecyclerView.Adapter<CommunityMediaAdapter.ViewHolder>() {
+class CommunityMediaAdapter(private val mContext: Context, private val communityMediaList: MutableList<CommunityMedia>, private val onCommunityMediaListener: OnCommunityMediaListener): RecyclerView.Adapter<CommunityMediaAdapter.ViewHolder>() {
 
     class ViewHolder(val binding: ItemListCommunityMediaLayoutBinding) : RecyclerView.ViewHolder(binding.root) {
 
@@ -29,5 +27,22 @@ class CommunityMediaAdapter(private val mContext: Context, private val community
         val communityMedia = communityMediaList[position]
 
         Glide.with(mContext).load(communityMedia.mediaUri).into(holder.binding.ivCommunityMedia)
+
+        holder.binding.cvCommunityMedia.setOnClickListener {
+            onCommunityMediaListener.onCommunityMediaClick(communityMedia, position)
+        }
+
+        holder.binding.cvCommunityMediaDelete.setOnClickListener {
+            onCommunityMediaListener.onCommunityMediaDelete(communityMedia, position)
+        }
+
+        holder.binding.ivCommunityMediaDelete.setOnClickListener {
+            onCommunityMediaListener.onCommunityMediaDelete(communityMedia, position)
+        }
+    }
+
+    interface OnCommunityMediaListener {
+        fun onCommunityMediaClick(communityMedia: CommunityMedia, position: Int)
+        fun onCommunityMediaDelete(communityMedia: CommunityMedia, position: Int)
     }
 }

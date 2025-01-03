@@ -43,7 +43,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
-class CommunityActivity : AppCompatActivity() {
+class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunityMediaListener {
 
     private val TAG: String? = CommunityActivity::class.simpleName
     private lateinit var viewBinding: ActivityCommunityBinding
@@ -139,7 +139,7 @@ class CommunityActivity : AppCompatActivity() {
             setupViewModel()
         }
 
-        communityMediaAdapter = CommunityMediaAdapter(mContext, communityMediaList)
+        communityMediaAdapter = CommunityMediaAdapter(mContext, communityMediaList, this)
         viewBinding.rvCommunityMedia.apply {
             adapter = communityMediaAdapter
             layoutManager = LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false)
@@ -301,7 +301,7 @@ class CommunityActivity : AppCompatActivity() {
 
     private fun setupUI() {
         viewBinding.pbCommunity.visibility = View.VISIBLE
-        viewBinding.tbCommunity.title = "Community"
+        viewBinding.tbCommunity.title = "Community Chat"
 
         setSupportActionBar(viewBinding.tbCommunity)
 
@@ -339,5 +339,22 @@ class CommunityActivity : AppCompatActivity() {
             viewBinding.tbCommunity.navigationIcon = wrappedIcon
         }
     }
+
+    override fun onCommunityMediaClick(communityMedia: CommunityMedia, position: Int) {
+
+    }
+
+    override fun onCommunityMediaDelete(communityMedia: CommunityMedia, position: Int) {
+        if (position in communityMediaList.indices) {
+            communityMediaList.removeAt(position)
+            communityMediaAdapter.notifyItemRemoved(position)
+            communityMediaAdapter.notifyItemRangeChanged(position, communityMediaList.size) // Adjust indices after removal
+        } else {
+            Toast.makeText(mContext, "Invalid position: $position", Toast.LENGTH_SHORT).show()
+        }
+
+        viewBinding.rvCommunityMedia.visibility = if (communityMediaList.isNotEmpty()) View.VISIBLE else View.GONE
+    }
+
 
 }
