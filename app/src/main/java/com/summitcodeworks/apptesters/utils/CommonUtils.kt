@@ -35,6 +35,12 @@ import com.airbnb.lottie.LottieAnimationView
 import com.airbnb.lottie.LottieDrawable
 import com.summitcodeworks.apptesters.R
 import java.io.InputStream
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
+import java.util.TimeZone
+import java.util.concurrent.TimeUnit
 
 class CommonUtils {
 
@@ -154,6 +160,7 @@ class CommonUtils {
                             val userDetails = response.body()?.response
                             if (userDetails != null) {
                                 SharedPrefsManager.saveUserDetails(mContext, userDetails)
+
                             } else {
                             }
                         } else {
@@ -287,7 +294,75 @@ class CommonUtils {
             dialog.show()
         }
 
+        fun formatDate(inputDate: String): String {
+            // Parse the ISO-8601 date string
+            val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.ENGLISH)
+            val outputFormat = SimpleDateFormat("d MMM yyyy", Locale.ENGLISH)
+
+            val date: Date = inputFormat.parse(inputDate) ?: return ""
+            val formattedDate = outputFormat.format(date)
+
+            // Add ordinal suffix to the day
+            val day = SimpleDateFormat("d", Locale.ENGLISH).format(date).toInt()
+            val dayWithSuffix = when {
+                day in 11..13 -> "${day}th"
+                day % 10 == 1 -> "${day}st"
+                day % 10 == 2 -> "${day}nd"
+                day % 10 == 3 -> "${day}rd"
+                else -> "${day}th"
+            }
+
+            val monthYear = SimpleDateFormat("MMM yyyy", Locale.ENGLISH).format(date)
+
+            return "$dayWithSuffix $monthYear"
+        }
+
+        fun extractPackageName(url: String): String? {
+            return try {
+                val uri = Uri.parse(url)
+                uri.getQueryParameter("id") // Extracts the 'id' query parameter
+            } catch (e: Exception) {
+                null // Return null if extraction fails
+            }
+        }
+
+        fun getDaysAgo(timestamp: String): String {
+            return try {
+                // Define the date format
+                val formatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSSS", Locale.getDefault())
+                formatter.timeZone = TimeZone.getTimeZone("UTC")
+
+                // Parse the timestamp
+                val date = formatter.parse(timestamp) ?: return "Invalid date"
+
+                // Get current date
+                val now = Date()
+
+                // Calculate difference in milliseconds
+                val diffInMillis = now.time - date.time
+
+                val days = TimeUnit.MILLISECONDS.toDays(diffInMillis)
+                val hours = TimeUnit.MILLISECONDS.toHours(diffInMillis) % 24
+                val minutes = TimeUnit.MILLISECONDS.toMinutes(diffInMillis) % 60
+                val seconds = TimeUnit.MILLISECONDS.toSeconds(diffInMillis) % 60
+
+                // Build the result string
+                return when {
+                    days > 0 -> "$days days, $hours hours ago"
+                    hours > 0 -> "$hours hours, $minutes minutes ago"
+                    minutes > 0 -> "$minutes minutes, $seconds seconds ago"
+                    seconds > 0 -> "$seconds seconds ago"
+                    else -> "Just now"
+                }
+            } catch (e: Exception) {
+                "Invalid date format"
+            }
+        }
+
     }
+
+
+
 
 
 }

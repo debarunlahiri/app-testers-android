@@ -32,7 +32,6 @@ import com.summitcodeworks.apptesters.apiInterface.AuthenticationCallback
 import com.summitcodeworks.apptesters.databinding.FragmentAddBinding
 import com.summitcodeworks.apptesters.models.UserAppRequest
 import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
-import com.summitcodeworks.apptesters.models.userDetails.UserDetails
 import com.summitcodeworks.apptesters.models.userDetails.UserDetailsResponse
 import com.summitcodeworks.apptesters.utils.CommonUtils
 import com.summitcodeworks.apptesters.utils.CommonUtils.Companion.applyBoldStyle
@@ -40,7 +39,6 @@ import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-import java.io.IOException
 import java.util.UUID
 
 // TODO: Rename parameter arguments, choose names that match
@@ -117,7 +115,6 @@ class AddFragment : Fragment() {
                 val data = result.data
                 selectedImageUri = data?.data
                 selectedImageUri?.let { uri ->
-                    // You can use this URI to display the image in an ImageView or upload it
                     viewBinding.ivUploadAppLogo.setImageURI(uri)
                 }
             } else {
@@ -143,11 +140,18 @@ class AddFragment : Fragment() {
                     val appLink = viewBinding.tiePostAppLink.text.toString()
                     val appLogo = selectedImageUri
                     val appDevName = viewBinding.tiePostAppDevName.text.toString()
+                    val appPackageName = CommonUtils.extractPackageName(appLink)
 
                     if (appName.isNotEmpty() && appDescription.isNotEmpty() && appLink.isNotEmpty() && appLogo != null && appDevName.isNotEmpty()) {
                         if (Patterns.WEB_URL.matcher(appLink).matches() && appLink.contains("id=") && appLink.contains("com.")) {
                             val userAppRequest = UserAppRequest()
-                            uploadImageToFirebase(appLogo, storageRef, userAppRequest)
+                            if (appPackageName != null) {
+                                uploadImageToFirebase(appLogo, storageRef, userAppRequest, appPackageName)
+                            } else {
+                                Toast.makeText(mContext, "Please enter a valid URL with an Android package name", Toast.LENGTH_SHORT).show()
+                                viewBinding.pbPostAppProgressBar.visibility = View.GONE
+                                viewBinding.bPostApp.visibility = View.VISIBLE
+                            }
                         } else {
                             Toast.makeText(mContext, "Please enter a valid URL with an Android package name", Toast.LENGTH_SHORT).show()
                             viewBinding.pbPostAppProgressBar.visibility = View.GONE
@@ -175,6 +179,10 @@ class AddFragment : Fragment() {
         }
 
 
+        setDeveloperName()
+    }
+
+    private fun setDeveloperName() {
         viewBinding.tiePostAppDevName.setText(SharedPrefsManager.getUserDetails(mContext).userName)
         viewBinding.tiePostAppDevName.isEnabled = false
     }
@@ -185,8 +193,7 @@ class AddFragment : Fragment() {
             override fun onSuccess(userDetails: UserDetailsResponse?) {
                 if (userDetails != null) {
                     SharedPrefsManager.saveUserDetails(requireContext(), userDetails)
-                    val postedOnText = "Available Credits: ${userDetails.userCredits}/60"
-                    viewBinding.tvPostAppAvailableCredits.text = applyBoldStyle("Available Credits:", postedOnText)
+                    setUserCredits()
 
                     if (userDetails.userCredits >= 60) {
                         viewBinding.bPostApp.isEnabled = true
@@ -208,19 +215,23 @@ class AddFragment : Fragment() {
         })
     }
 
+    private fun setUserCredits() {
+        val postedOnText = "Available Credits: ${SharedPrefsManager.getUserDetails(mContext).userCredits}/60"
+        viewBinding.tvPostAppAvailableCredits.text = applyBoldStyle("Available Credits:", postedOnText)
+    }
+
     private fun uploadImageToFirebase(
         fileUri: Uri,
         storageRef: StorageReference,
-        userAppRequest: UserAppRequest
+        userAppRequest: UserAppRequest,
+        appPackageName: String
     ) {
         val fileName = UUID.randomUUID().toString() + ".jpg"
         val fileRef = storageRef.child("app_logos/$fileName")
 
         fileRef.putFile(fileUri)
             .addOnSuccessListener {
-                // Get the download URL
                 fileRef.downloadUrl.addOnSuccessListener { downloadUrl ->
-                    // Handle successful image upload (e.g., save the URL to your database)
                     userAppRequest.appName = viewBinding.tiePostAppName.text.toString()
                     userAppRequest.appDescription = viewBinding.tiePostAppDescription.text.toString()
                     userAppRequest.appLink = viewBinding.tiePostAppLink.text.toString()
@@ -228,6 +239,7 @@ class AddFragment : Fragment() {
                     userAppRequest.appLogo = downloadUrl.toString()
                     userAppRequest.userCreatedBy = SharedPrefsManager.getUserDetails(mContext).userId.toString()
                     userAppRequest.appDevName = viewBinding.tiePostAppDevName.text.toString()
+                    userAppRequest.appPkgNme = appPackageName
                     userAppRequest.appCredit = "20"
 
                     RetrofitClient.apiInterface(mContext).createApp(userAppRequest).enqueue(object : Callback<ResponseHandler> {
@@ -242,7 +254,10 @@ class AddFragment : Fragment() {
                                     viewBinding.bPostApp.visibility = View.VISIBLE
                                     viewBinding.bPostApp.isEnabled = true
                                     clearFields()
-                                    CommonUtils.authenticateUser(mContext)
+                                    CommonUtils.authenticateUser(mContext).apply {
+                                        setDeveloperName()
+                                        setUserCredits()
+                                    }
                                 }
                             } else {
                                 viewBinding.pbPostAppProgressBar.visibility = View.GONE
@@ -262,7 +277,6 @@ class AddFragment : Fragment() {
                 }
             }
             .addOnFailureListener { e ->
-                // Handle unsuccessful uploads
                 Toast.makeText(mContext, "Image upload failed: ${e.message}", Toast.LENGTH_LONG).show()
                 viewBinding.pbPostAppProgressBar.visibility = View.GONE
                 viewBinding.bPostApp.visibility = View.VISIBLE
@@ -286,12 +300,10 @@ class AddFragment : Fragment() {
             android.Manifest.permission.READ_EXTERNAL_STORAGE
         }
 
-        // Check if both permissions are already granted
         if (ContextCompat.checkSelfPermission(mContext, cameraPermission) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(mContext, storagePermission) == PackageManager.PERMISSION_GRANTED) {
             showImageSourceOptions()
         } else {
-            // Request camera and storage/media permissions
             permissionLauncher.launch(arrayOf(cameraPermission, storagePermission))
         }
     }

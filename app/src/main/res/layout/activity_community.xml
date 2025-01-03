@@ -32,8 +32,13 @@
         android:id="@+id/tvCommunityConnectionStatus"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="TextView"
+        android:background="#E91E63"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
+        android:text="Disconnected"
         android:textAlignment="center"
+        android:textColor="@color/colorWhite"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tbCommunity" />
@@ -55,7 +60,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="16dp"
-        app:cardCornerRadius="50dp"
+        app:cardCornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -64,6 +69,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCommunityMedia"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
             <androidx.cardview.widget.CardView
                 android:id="@+id/cvChatAttachment"
                 android:layout_width="40dp"
@@ -71,13 +85,13 @@
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
-                android:foreground="?selectableItemBackground"
                 android:clickable="true"
+                android:foreground="?selectableItemBackground"
                 app:cardBackgroundColor="@color/colorPrimary"
                 app:cardCornerRadius="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rvCommunityMedia"
                 app:layout_constraintVertical_bias="1.0">
 
                 <ImageView
@@ -86,14 +100,14 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
-                    app:tint="@color/colorWhite"
-                    app:srcCompat="@drawable/baseline_attach_file_24" />
+                    app:srcCompat="@drawable/baseline_attach_file_24"
+                    app:tint="@color/colorWhite" />
             </androidx.cardview.widget.CardView>
 
             <EditText
                 android:id="@+id/etCommunityMessage"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
                 android:layout_marginTop="8dp"
                 android:layout_marginBottom="8dp"
@@ -101,10 +115,15 @@
                 android:ems="10"
                 android:hint="Write something..."
                 android:inputType="text|textCapSentences|textMultiLine"
+                android:paddingLeft="8dp"
+                android:paddingTop="8dp"
+                android:paddingRight="8dp"
+                android:paddingBottom="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/cvChatSendMessage"
                 app:layout_constraintStart_toEndOf="@+id/cvChatAttachment"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/rvCommunityMedia"
+                app:layout_constraintVertical_bias="1.0" />
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cvChatSendMessage"
@@ -113,13 +132,13 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:foreground="?selectableItemBackground"
                 android:clickable="true"
+                android:foreground="?selectableItemBackground"
                 app:cardBackgroundColor="@color/colorPrimary"
                 app:cardCornerRadius="20dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/rvCommunityMedia"
                 app:layout_constraintVertical_bias="1.0">
 
                 <ImageView
@@ -128,9 +147,10 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_margin="10dp"
-                    app:tint="@color/colorWhite"
-                    app:srcCompat="@drawable/outline_send_24" />
+                    app:srcCompat="@drawable/outline_send_24"
+                    app:tint="@color/colorWhite" />
             </androidx.cardview.widget.CardView>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 

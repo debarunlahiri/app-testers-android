@@ -10,6 +10,7 @@ data class UserAppRequest(
     @SerializedName("appDesc") private var _appDescription: String = "",
     @SerializedName("appLogo") private var _appLogo: String = "",
     @SerializedName("appCreatedBy") private var _userCreatedBy: String = "",
+    @SerializedName("appPkgNme") private var _appPkgNme: String = "",
     @SerializedName("appCredit") private var _appCredit: String = ""
 ) {
     var appName: String
@@ -52,6 +53,12 @@ data class UserAppRequest(
         get() = _userCreatedBy
         set(value) {
             _userCreatedBy = value
+        }
+
+    var appPkgNme: String
+        get() = _appPkgNme
+        set(value) {
+            _appPkgNme = value
         }
 
     var appCredit: String

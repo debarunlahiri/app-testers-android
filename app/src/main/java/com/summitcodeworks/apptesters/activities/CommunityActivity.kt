@@ -1,7 +1,5 @@
 package com.summitcodeworks.apptesters.activities
 
-import android.Manifest
-import android.app.Activity
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -11,17 +9,14 @@ import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import androidx.activity.enableEdgeToEdge
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
@@ -33,16 +28,16 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
-import com.google.gson.Gson
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.adapter.CommunityAdapter
+import com.summitcodeworks.apptesters.adapter.CommunityMediaAdapter
 import com.summitcodeworks.apptesters.apiClient.WebSocketService
-import com.summitcodeworks.apptesters.apiClient.WebSocketService.ConnectionStatus
 import com.summitcodeworks.apptesters.databinding.ActivityCommunityBinding
 import com.summitcodeworks.apptesters.models.AppCommunity
 import com.summitcodeworks.apptesters.models.ChatViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.summitcodeworks.apptesters.models.CommunityMedia
+import com.summitcodeworks.apptesters.utils.CommonUtils
+import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
@@ -59,28 +54,36 @@ class CommunityActivity : AppCompatActivity() {
     private var chatViewModel = ChatViewModel()
     private lateinit var communityAdapter: CommunityAdapter
     private var communityList: MutableList<AppCommunity> = mutableListOf()
+    private lateinit var communityMediaAdapter: CommunityMediaAdapter
+    private var communityMediaList: MutableList<CommunityMedia> = mutableListOf()
 
-    private val captureImage = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val imageUri = result.data?.data
-            imageUri?.let {
-                handleMedia(mContext, it)
-            }
+
+    private var permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        val cameraGranted = permissions[android.Manifest.permission.CAMERA] ?: false
+        val storageGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
+
+        if (cameraGranted && storageGranted) {
+            showImageSourceOptions()
+        } else {
+//                Toast.makeText(mContext, "Permissions denied", Toast.LENGTH_SHORT).show()
         }
     }
 
-    private val captureVideo = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val videoUri = result.data?.data
-            videoUri?.let {
-                handleMedia(mContext, it)
+    private val imageResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == RESULT_OK) {
+            val data = result.data
+            data?.data?.let {
+                val media = CommunityMedia(it)
+                communityMediaList.add(media)
+                communityMediaAdapter.notifyDataSetChanged()
+                if (communityMediaList.isNotEmpty()) {
+                    viewBinding.rvCommunityMedia.visibility = View.VISIBLE
+                } else {
+                    viewBinding.rvCommunityMedia.visibility = View.GONE
+                }
             }
-        }
-    }
-
-    private val selectMedia = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-        uri?.let {
-            handleMedia(mContext, it)
+        } else {
+            Toast.makeText(mContext, "Image selection cancelled", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -99,37 +102,28 @@ class CommunityActivity : AppCompatActivity() {
         setupUI()
 
         viewBinding.cvChatAttachment.setOnClickListener {
-            checkPermissionsAndProceed()
+            checkPermissions()
         }
 
-
-//        val message = it.chatMessage
-//        val senderKey = it.senderKey
-//        val chatTimestamp = it.chatTimestamp
-//        val chatAttachment = it.chatAttachment
-//        val senderId = it.senderId
-//        val chatId = it.chatId
-//        val useFlag = it.useFlag
-//        val chat = AppCommunity(
-//            chatId = chatId,
-//            senderId = senderId,
-//            senderKey = senderKey,
-//            chatMessage = message,
-//            chatAttachment = chatAttachment,
-//            chatTimestamp = chatTimestamp,
-//            useFlag = useFlag
-//        )
-//
-//        Log.i(TAG, "onCreate:chatViewModel ${Gson().toJson(chat)}")
 
         viewBinding.cvChatSendMessage.setOnClickListener {
             val message = viewBinding.etCommunityMessage.text.toString()
             if (message.isEmpty()) {
-                showToast("Please enter a message.")
+                CommonUtils.showToastLong(mContext, "Please enter a message.")
                 return@setOnClickListener
             }
-            chatViewModel.sendMessage(viewBinding.etCommunityMessage.text.toString(), 1, "senderKey")
-            viewBinding.etCommunityMessage.text.clear()
+            if (communityMediaList.isNotEmpty()) {
+                communityMediaList.forEach {
+                    handleMedia(mContext, it.mediaUri)
+                }.apply {
+                    chatViewModel.sendMessage(viewBinding.etCommunityMessage.text.toString(), SharedPrefsManager.getUserDetails(mContext).userId, SharedPrefsManager.getUserDetails(mContext).userKey)
+                    viewBinding.etCommunityMessage.text.clear()
+                }
+            } else {
+                chatViewModel.sendMessage(viewBinding.etCommunityMessage.text.toString(), SharedPrefsManager.getUserDetails(mContext).userId, SharedPrefsManager.getUserDetails(mContext).userKey)
+                viewBinding.etCommunityMessage.text.clear()
+            }
+
         }
 
     }
@@ -144,6 +138,13 @@ class CommunityActivity : AppCompatActivity() {
             }
             setupViewModel()
         }
+
+        communityMediaAdapter = CommunityMediaAdapter(mContext, communityMediaList)
+        viewBinding.rvCommunityMedia.apply {
+            adapter = communityMediaAdapter
+            layoutManager = LinearLayoutManager(mContext, LinearLayoutManager.HORIZONTAL, false)
+        }
+
     }
 
     private fun setupViewModel() {
@@ -179,35 +180,6 @@ class CommunityActivity : AppCompatActivity() {
             setTextColor(color)
             setText(text)
         }
-    }
-
-    private fun showMediaOptionsDialog() {
-        val options = arrayOf("Capture Image", "Capture Video", "Select from Gallery")
-        AlertDialog.Builder(this)
-            .setTitle("Choose Media Option")
-            .setItems(options) { _, which ->
-                when (which) {
-                    0 -> openCameraForImage()
-                    1 -> openCameraForVideo()
-                    2 -> selectMediaFromGallery()
-                }
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
-    }
-
-    fun openCameraForImage() {
-        val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        captureImage.launch(intent)
-    }
-
-    fun openCameraForVideo() {
-        val intent = Intent(MediaStore.ACTION_VIDEO_CAPTURE)
-        captureVideo.launch(intent)
-    }
-
-    fun selectMediaFromGallery() {
-        selectMedia.launch("*/*")
     }
 
     private fun compressImage(uri: Uri): File? {
@@ -275,48 +247,57 @@ class CommunityActivity : AppCompatActivity() {
         firebaseRef.putFile(fileUri)
             .addOnSuccessListener {
                 firebaseRef.downloadUrl.addOnSuccessListener { uri ->
-                    showToast("Upload successful: $uri")
+//                    CommonUtils.showToastLong(mContext, "Upload successful: $uri")
+
                 }
             }
             .addOnFailureListener {
-                showToast("Upload failed: ${it.message}")
+                CommonUtils.showToastLong(mContext, "Upload failed: ${it.message}")
             }
     }
 
-
-    private fun showToast(message: String) {
-        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_SHORT).show()
+    private fun openCamera() {
+        val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+        imageResultLauncher.launch(cameraIntent)
     }
 
-    private val requestPermission = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val allGranted = permissions.entries.all { it.value }
-        if (allGranted) {
-            showMediaOptionsDialog()
+    private fun openGallery() {
+        val fileManagerIntent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"  // restrict to image files only
+        }
+        imageResultLauncher.launch(fileManagerIntent)
+    }
+
+    private fun showImageSourceOptions() {
+        val options = arrayOf("Camera", "Gallery")
+        AlertDialog.Builder(mContext)
+            .setTitle("Select Image Source")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> openCamera()
+                    1 -> openGallery()
+                }
+            }
+            .show()
+    }
+
+    private fun checkPermissions() {
+        val cameraPermission = android.Manifest.permission.CAMERA
+        val storagePermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            android.Manifest.permission.READ_MEDIA_IMAGES
         } else {
-            showToast("Permissions are required to proceed.")
+            android.Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+
+        if (ContextCompat.checkSelfPermission(mContext, cameraPermission) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(mContext, storagePermission) == PackageManager.PERMISSION_GRANTED) {
+            showImageSourceOptions()
+        } else {
+            permissionLauncher.launch(arrayOf(cameraPermission, storagePermission))
         }
     }
 
-    private fun checkPermissionsAndProceed() {
-        val permissions = mutableListOf<String>()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(Manifest.permission.READ_MEDIA_IMAGES)
-            permissions.add(Manifest.permission.READ_MEDIA_VIDEO)
-        } else {
-            permissions.add(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-        permissions.add(Manifest.permission.CAMERA)
-
-        val permissionsToRequest = permissions.filter {
-            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
-
-        if (permissionsToRequest.isNotEmpty()) {
-            requestPermission.launch(permissionsToRequest.toTypedArray())
-        } else {
-            showMediaOptionsDialog()
-        }
-    }
 
     private fun setupUI() {
         viewBinding.pbCommunity.visibility = View.VISIBLE

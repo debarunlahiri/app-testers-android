@@ -225,7 +225,7 @@ class DetailActivity : AppCompatActivity() {
             viewBinding.avDevProfileImage.avatarInitials = appDetailsResponse.appDevName
         }
 
-        val postedOnText = "Posted on: ${CommonUtils.convertDate(appDetailsResponse.appCreatedOn)}"
+        val postedOnText = "Posted on: ${CommonUtils.formatDate(appDetailsResponse.appCreatedOn)}"
         viewBinding.tvDetailPostedOn.text = applyBoldStyle("Posted on: ", postedOnText)
 
         val creditsText = "Credits: ${appDetailsResponse.appCredit}"

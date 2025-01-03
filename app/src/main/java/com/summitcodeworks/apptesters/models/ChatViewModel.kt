@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ChatViewModel : ViewModel() {
-    private val webSocketService = WebSocketService("ws://192.168.0.28:8082/ws/websocket")
+    private val webSocketService = WebSocketService("ws://192.168.0.162:8082/ws/websocket")
 
     private val _messages = MutableStateFlow<List<AppCommunity>>(emptyList())
     val messages = _messages.asStateFlow()
