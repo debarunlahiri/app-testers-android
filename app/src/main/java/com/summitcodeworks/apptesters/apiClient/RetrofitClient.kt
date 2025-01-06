@@ -20,7 +20,7 @@ object RetrofitClient {
 
     // Set this to switch between environments
 //    var currentEnvironment = Environment.DEV
-    var currentEnvironment = Environment.DEV
+    var currentEnvironment = Environment.PROD
     var API_KEY = "" // Replace this with your actual API key
 
     public val baseUrl: String
