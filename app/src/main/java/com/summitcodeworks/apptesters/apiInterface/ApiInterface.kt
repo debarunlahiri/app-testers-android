@@ -3,6 +3,7 @@ package com.summitcodeworks.apptesters.apiInterface
 import com.summitcodeworks.apptesters.models.AddCreditsRequest
 import com.summitcodeworks.apptesters.models.ChatMessage
 import com.summitcodeworks.apptesters.models.MarkStageRequest
+import com.summitcodeworks.apptesters.models.MediaRequest
 import com.summitcodeworks.apptesters.models.Role
 import com.summitcodeworks.apptesters.models.ServerStatus
 import com.summitcodeworks.apptesters.models.UserAppRequest
@@ -34,6 +35,9 @@ interface ApiInterface {
 
     @POST("api/stages")
     fun markStage(@Body markStageRequest: MarkStageRequest): Call<ResponseHandler>
+
+    @POST("api/media")
+    fun postMedia(@Body mediaRequest: MediaRequest): Call<ResponseHandler>
 
 
 

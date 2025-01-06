@@ -53,11 +53,35 @@ class ChatViewModel : ViewModel() {
 
     fun sendMessage(message: String, senderId: Int, senderKey: String) {
         val chat = AppCommunity(
+            chatId = -1,
             senderId = senderId,
             senderKey = senderKey,
             chatMessage = message
         )
         webSocketService.sendMessage(chat)
+    }
+
+    fun sendMessageWithMedia(message: String, senderId: Int, senderKey: String, mediaList: List<Media>) {
+        val chat = AppCommunity(
+            chatId = -1,
+            senderId = senderId,
+            senderKey = senderKey,
+            chatMessage = message,
+            mediaList = mediaList
+        )
+        webSocketService.sendMessage(chat)
+    }
+
+    fun convertCommunityMediaToMediaList(
+        communityMediaList: List<CommunityMedia>,
+    ): List<Media> {
+        return communityMediaList.map { communityMedia ->
+            Media(
+                chatId = -1,
+                mediaUrl = communityMedia.mediaUri.toString(), // Convert Uri to String
+                mediaType = "image", // Optional parameter, pass if available
+            )
+        }
     }
 
     override fun onCleared() {

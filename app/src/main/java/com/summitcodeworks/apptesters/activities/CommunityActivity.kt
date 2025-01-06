@@ -1,5 +1,6 @@
 package com.summitcodeworks.apptesters.activities
 
+import android.animation.ValueAnimator
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -12,11 +13,14 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
+import android.util.TypedValue
 import android.view.View
+import android.view.animation.LinearInterpolator
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.ViewCompat
@@ -26,19 +30,28 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.bumptech.glide.Glide
 import com.google.firebase.storage.FirebaseStorage
 import com.google.firebase.storage.StorageReference
+import com.google.gson.Gson
+import com.stfalcon.imageviewer.StfalconImageViewer
 import com.summitcodeworks.apptesters.R
 import com.summitcodeworks.apptesters.adapter.CommunityAdapter
 import com.summitcodeworks.apptesters.adapter.CommunityMediaAdapter
+import com.summitcodeworks.apptesters.apiClient.RetrofitClient
 import com.summitcodeworks.apptesters.apiClient.WebSocketService
 import com.summitcodeworks.apptesters.databinding.ActivityCommunityBinding
 import com.summitcodeworks.apptesters.models.AppCommunity
 import com.summitcodeworks.apptesters.models.ChatViewModel
 import com.summitcodeworks.apptesters.models.CommunityMedia
+import com.summitcodeworks.apptesters.models.MediaRequest
+import com.summitcodeworks.apptesters.models.responseHandler.ResponseHandler
 import com.summitcodeworks.apptesters.utils.CommonUtils
 import com.summitcodeworks.apptesters.utils.SharedPrefsManager
 import kotlinx.coroutines.launch
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -58,34 +71,30 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
     private var communityMediaList: MutableList<CommunityMedia> = mutableListOf()
 
 
-    private var permissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-        val cameraGranted = permissions[android.Manifest.permission.CAMERA] ?: false
-        val storageGranted = permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
+    private var permissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val cameraGranted = permissions[android.Manifest.permission.CAMERA] ?: false
+            val storageGranted =
+                permissions[android.Manifest.permission.READ_EXTERNAL_STORAGE] ?: false
 
-        if (cameraGranted && storageGranted) {
-            showImageSourceOptions()
-        } else {
+            if (cameraGranted && storageGranted) {
+                showImageSourceOptions()
+            } else {
 //                Toast.makeText(mContext, "Permissions denied", Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    private val imageResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val data = result.data
-            data?.data?.let {
-                val media = CommunityMedia(it)
-                communityMediaList.add(media)
-                communityMediaAdapter.notifyDataSetChanged()
-                if (communityMediaList.isNotEmpty()) {
-                    viewBinding.rvCommunityMedia.visibility = View.VISIBLE
-                } else {
-                    viewBinding.rvCommunityMedia.visibility = View.GONE
-                }
             }
-        } else {
-            Toast.makeText(mContext, "Image selection cancelled", Toast.LENGTH_SHORT).show()
         }
-    }
+
+    private val imageResultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK) {
+                val data = result.data
+                data?.data?.let {
+                    handleMedia(mContext, it)
+                }
+            } else {
+                Toast.makeText(mContext, "Image selection cancelled", Toast.LENGTH_SHORT).show()
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,29 +111,58 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
         setupUI()
 
         viewBinding.cvChatAttachment.setOnClickListener {
+            if (communityMediaList.size >= 5) {
+                CommonUtils.showToastLong(mContext, "You can only attach up to 5 media files.")
+                return@setOnClickListener
+            }
             checkPermissions()
         }
 
 
         viewBinding.cvChatSendMessage.setOnClickListener {
-            val message = viewBinding.etCommunityMessage.text.toString()
-            if (message.isEmpty()) {
-                CommonUtils.showToastLong(mContext, "Please enter a message.")
-                return@setOnClickListener
-            }
-            if (communityMediaList.isNotEmpty()) {
-                communityMediaList.forEach {
-                    handleMedia(mContext, it.mediaUri)
-                }.apply {
-                    chatViewModel.sendMessage(viewBinding.etCommunityMessage.text.toString(), SharedPrefsManager.getUserDetails(mContext).userId, SharedPrefsManager.getUserDetails(mContext).userKey)
+            val message = viewBinding.etCommunityMessage.text.toString().trim()
+            when {
+                message.isEmpty() && communityMediaList.isEmpty() -> {
+                    CommonUtils.showToastLong(mContext, "Please enter a message or add media before sending.")
+                }
+                message.isNotEmpty() && communityMediaList.isEmpty() -> {
+                    chatViewModel.sendMessage(
+                        message,
+                        SharedPrefsManager.getUserDetails(mContext).userId,
+                        SharedPrefsManager.getUserDetails(mContext).userKey
+                    )
                     viewBinding.etCommunityMessage.text.clear()
                 }
-            } else {
-                chatViewModel.sendMessage(viewBinding.etCommunityMessage.text.toString(), SharedPrefsManager.getUserDetails(mContext).userId, SharedPrefsManager.getUserDetails(mContext).userKey)
-                viewBinding.etCommunityMessage.text.clear()
+                message.isEmpty() && communityMediaList.isNotEmpty() -> {
+//                    sendMessageWithMedia()
+                    chatViewModel.sendMessageWithMedia(
+                        message,
+                        SharedPrefsManager.getUserDetails(mContext).userId,
+                        SharedPrefsManager.getUserDetails(mContext).userKey,
+                        chatViewModel.convertCommunityMediaToMediaList(communityMediaList)
+                    )
+                    communityMediaList.clear()
+                    communityMediaAdapter.notifyDataSetChanged()
+                    viewBinding.rvCommunityMedia.visibility = View.GONE
+                    animateCardCornerRadiusDp(viewBinding.cvCommunityChatBox, 0f, 50f, 300)
+                }
+                message.isNotEmpty() && communityMediaList.isNotEmpty() -> {
+//                    sendMessageWithMedia()
+                    chatViewModel.sendMessageWithMedia(
+                        message,
+                        SharedPrefsManager.getUserDetails(mContext).userId,
+                        SharedPrefsManager.getUserDetails(mContext).userKey,
+                        chatViewModel.convertCommunityMediaToMediaList(communityMediaList)
+                    )
+                    viewBinding.etCommunityMessage.text.clear()
+                    communityMediaList.clear()
+                    communityMediaAdapter.notifyDataSetChanged()
+                    viewBinding.rvCommunityMedia.visibility = View.GONE
+                    animateCardCornerRadiusDp(viewBinding.cvCommunityChatBox, 0f, 50f, 300)
+                }
             }
-
         }
+
 
     }
 
@@ -154,7 +192,8 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 chatViewModel.messages.collect { messages ->
                     Log.d("ChatActivity", "Updating UI with messages: ${messages.size}")
-                    communityAdapter.submitList(messages)
+                    val uniqueMessages = messages.distinctBy { it.chatId }
+                    communityAdapter.submitList(uniqueMessages)
                     viewBinding.rvCommunity.scrollToPosition(0)
                 }
             }
@@ -171,14 +210,19 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
     }
 
     private fun updateConnectionStatus(status: WebSocketService.ConnectionStatus) {
-        val (text, color) = when (status) {
-            WebSocketService.ConnectionStatus.Connected -> "Connected" to Color.GREEN
-            WebSocketService.ConnectionStatus.Disconnected -> "Disconnected" to Color.GRAY
-            WebSocketService.ConnectionStatus.Error -> "Error" to Color.RED
+        var (text, textColor, backgroundColor) = when (status) {
+            WebSocketService.ConnectionStatus.Connected ->
+                Triple("", Color.WHITE, Color.parseColor("#8BC34A"))
+            WebSocketService.ConnectionStatus.Disconnected ->
+                Triple("", Color.BLACK, Color.parseColor("#9E9E9E"))
+            WebSocketService.ConnectionStatus.Error ->
+                Triple("", Color.WHITE, Color.parseColor("#F44336"))
         }
+
         viewBinding.tvCommunityConnectionStatus.apply {
-            setTextColor(color)
-            setText(text)
+            setBackgroundColor(backgroundColor)
+            setTextColor(textColor)
+            text = text
         }
     }
 
@@ -247,13 +291,50 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
         firebaseRef.putFile(fileUri)
             .addOnSuccessListener {
                 firebaseRef.downloadUrl.addOnSuccessListener { uri ->
-//                    CommonUtils.showToastLong(mContext, "Upload successful: $uri")
-
+                    val media = CommunityMedia(uri)
+                    communityMediaList.add(media)
+                    communityMediaAdapter.notifyDataSetChanged()
+                    if (communityMediaList.isNotEmpty()) {
+                        viewBinding.rvCommunityMedia.visibility = View.VISIBLE
+                        animateCardCornerRadiusDp(viewBinding.cvCommunityChatBox, 0f, 10f, 300)
+                    } else {
+                        viewBinding.rvCommunityMedia.visibility = View.GONE
+                        animateCardCornerRadiusDp(viewBinding.cvCommunityChatBox, 0f, 50f, 300)
+                    }
                 }
             }
             .addOnFailureListener {
                 CommonUtils.showToastLong(mContext, "Upload failed: ${it.message}")
             }
+    }
+
+    private fun sendMessageWithMedia() {
+        val mediaRequest = MediaRequest()
+        if (communityMediaList.size > 0) {
+            for (communityMedia in communityMediaList) {
+                mediaRequest.mediaUrl.add(communityMedia.mediaUri.toString())
+            }
+            mediaRequest.senderId = SharedPrefsManager.getUserDetails(mContext).userId
+            mediaRequest.senderKey = SharedPrefsManager.getUserDetails(mContext).userKey
+            mediaRequest.mediaType = "image"
+            mediaRequest.chatMessage = viewBinding.etCommunityMessage.text.toString()
+            RetrofitClient.apiInterface(mContext).postMedia(mediaRequest).enqueue(object : Callback<ResponseHandler> {
+                override fun onResponse(p0: Call<ResponseHandler>, p1: Response<ResponseHandler>) {
+                    if (p1.isSuccessful) {
+                        CommonUtils.showToastLong(mContext, "Media uploaded successfully")
+                    } else {
+                        CommonUtils.showToastLong(mContext, "Media upload failed")
+                    }
+                    Log.e(TAG, "onResponse: " + p1.message())
+                }
+
+                override fun onFailure(p0: Call<ResponseHandler>, p1: Throwable) {
+                    CommonUtils.showToastLong(mContext, "Media upload failed. ${p1.message}")
+                    Log.e(TAG, "onFailure: ${p1.message}\n${Gson().toJson(mediaRequest)}")
+                }
+            })
+        }
+
     }
 
     private fun openCamera() {
@@ -284,18 +365,55 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
 
     private fun checkPermissions() {
         val cameraPermission = android.Manifest.permission.CAMERA
-        val storagePermission = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-            android.Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            android.Manifest.permission.READ_EXTERNAL_STORAGE
-        }
+        val storagePermission =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                android.Manifest.permission.READ_MEDIA_IMAGES
+            } else {
+                android.Manifest.permission.READ_EXTERNAL_STORAGE
+            }
 
-        if (ContextCompat.checkSelfPermission(mContext, cameraPermission) == PackageManager.PERMISSION_GRANTED &&
-            ContextCompat.checkSelfPermission(mContext, storagePermission) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(
+                mContext,
+                cameraPermission
+            ) == PackageManager.PERMISSION_GRANTED &&
+            ContextCompat.checkSelfPermission(
+                mContext,
+                storagePermission
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             showImageSourceOptions()
         } else {
             permissionLauncher.launch(arrayOf(cameraPermission, storagePermission))
         }
+    }
+
+    private fun animateCardCornerRadiusDp(
+        cardView: CardView,
+        startRadiusDp: Float,
+        endRadiusDp: Float,
+        duration: Long
+    ) {
+        val startRadiusPx = dpToPx(startRadiusDp)
+        val endRadiusPx = dpToPx(endRadiusDp)
+
+        val animator = ValueAnimator.ofFloat(startRadiusPx, endRadiusPx)
+        animator.duration = duration
+        animator.interpolator = LinearInterpolator()
+
+        animator.addUpdateListener { animation ->
+            val animatedValue = animation.animatedValue as Float
+            cardView.radius = animatedValue
+        }
+
+        animator.start()
+    }
+
+    private fun dpToPx(dp: Float): Float {
+        return TypedValue.applyDimension(
+            TypedValue.COMPLEX_UNIT_DIP,
+            dp,
+            resources.displayMetrics
+        )
     }
 
 
@@ -318,11 +436,22 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
         val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         when (currentNightMode) {
             Configuration.UI_MODE_NIGHT_NO -> {
-                viewBinding.tbCommunity.setTitleTextColor(ContextCompat.getColor(this, R.color.colorWhite))
+                viewBinding.tbCommunity.setTitleTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.colorWhite
+                    )
+                )
                 tintNavigationIcon(navigationIcon, R.color.colorWhite)
             }
+
             Configuration.UI_MODE_NIGHT_YES -> {
-                viewBinding.tbCommunity.setTitleTextColor(ContextCompat.getColor(this, R.color.colorWhite))
+                viewBinding.tbCommunity.setTitleTextColor(
+                    ContextCompat.getColor(
+                        this,
+                        R.color.colorWhite
+                    )
+                )
                 tintNavigationIcon(navigationIcon, R.color.colorWhite)
             }
         }
@@ -341,19 +470,30 @@ class CommunityActivity : AppCompatActivity(), CommunityMediaAdapter.OnCommunity
     }
 
     override fun onCommunityMediaClick(communityMedia: CommunityMedia, position: Int) {
-
+        StfalconImageViewer.Builder(mContext, communityMediaList) { view, image ->
+            Glide.with(mContext).load(image.mediaUri).into(view)
+        }.withStartPosition(position).show()
     }
 
     override fun onCommunityMediaDelete(communityMedia: CommunityMedia, position: Int) {
         if (position in communityMediaList.indices) {
             communityMediaList.removeAt(position)
             communityMediaAdapter.notifyItemRemoved(position)
-            communityMediaAdapter.notifyItemRangeChanged(position, communityMediaList.size) // Adjust indices after removal
+            communityMediaAdapter.notifyItemRangeChanged(
+                position,
+                communityMediaList.size
+            ) // Adjust indices after removal
         } else {
             Toast.makeText(mContext, "Invalid position: $position", Toast.LENGTH_SHORT).show()
         }
 
-        viewBinding.rvCommunityMedia.visibility = if (communityMediaList.isNotEmpty()) View.VISIBLE else View.GONE
+        if (communityMediaList.isNotEmpty()) {
+            viewBinding.rvCommunityMedia.visibility = View.VISIBLE
+            animateCardCornerRadiusDp(viewBinding.cvCommunityChatBox, 0f, 10f, 300)
+        } else {
+            viewBinding.rvCommunityMedia.visibility = View.GONE
+            animateCardCornerRadiusDp(viewBinding.cvCommunityChatBox, 0f, 50f, 300)
+        }
     }
 
 

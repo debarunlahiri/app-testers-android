@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginVertical="4dp"
-    android:layout_marginLeft="8dp"
-    android:layout_marginRight="8dp"
     app:cardBackgroundColor="@null"
     app:cardCornerRadius="0dp"
     app:cardElevation="0dp"
@@ -14,8 +11,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="12dp">
+        android:layout_height="match_parent">
 
         <io.getstream.avatarview.AvatarView
             android:id="@+id/avCommunityProfile"
@@ -24,6 +20,7 @@
             android:layout_gravity="center"
             android:layout_marginTop="8dp"
             android:scaleType="centerCrop"
+            android:layout_marginStart="8dp"
             app:avatarViewBorderColor="@color/grey"
             app:avatarViewBorderWidth="0dp"
             app:avatarViewInitialsTextStyle="bold"
@@ -37,8 +34,10 @@
             android:id="@+id/textViewSender"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
             android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/avCommunityProfile"
             app:layout_constraintTop_toTopOf="parent"
@@ -51,36 +50,54 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:textSize="16sp"
+            android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/avCommunityProfile"
             app:layout_constraintTop_toBottomOf="@id/textViewSender"
             tools:text="This is a message" />
 
-        <ImageView
-            android:id="@+id/imageViewAttachment"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@drawable/ic_group_selector"
-            android:visibility="gone"
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cvCommunityMediaPreview"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="16dp"
+            app:cardCornerRadius="10dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/avCommunityProfile"
-            app:layout_constraintTop_toBottomOf="@+id/textViewMessage"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toBottomOf="@+id/textViewMessage">
+
+            <include
+                android:id="@+id/includeCommunityMediaPreview"
+                layout="@layout/item_list_community_media_preview_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvCommunityMediaPreview"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone" />
+        </androidx.cardview.widget.CardView>
 
         <TextView
             android:id="@+id/textViewTimestamp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:textSize="12sp"
+            android:textColor="@color/grey"
+            android:textSize="10sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/avCommunityProfile"
-            app:layout_constraintTop_toBottomOf="@+id/imageViewAttachment"
+            app:layout_constraintTop_toBottomOf="@+id/cvCommunityMediaPreview"
             tools:text="2024-12-28 14:30" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-</com.google.android.material.card.MaterialCardView>
+</androidx.cardview.widget.CardView>

@@ -348,9 +348,9 @@ class CommonUtils {
 
                 // Build the result string
                 return when {
-                    days > 0 -> "$days days, $hours hours ago"
-                    hours > 0 -> "$hours hours, $minutes minutes ago"
-                    minutes > 0 -> "$minutes minutes, $seconds seconds ago"
+                    days > 0 -> "$days days ago"
+                    hours > 0 -> "$hours hours ago"
+                    minutes > 0 -> "$minutes minutes ago"
                     seconds > 0 -> "$seconds seconds ago"
                     else -> "Just now"
                 }
@@ -358,6 +358,8 @@ class CommonUtils {
                 "Invalid date format"
             }
         }
+
+
 
     }
 

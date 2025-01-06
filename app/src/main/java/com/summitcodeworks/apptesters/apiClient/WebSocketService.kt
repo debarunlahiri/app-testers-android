@@ -76,30 +76,8 @@ class WebSocketService(private val serverUrl: String) {
                             val jsonPayload = message.substring(payloadStart).trimEnd('\u0000')
 
                             when (destination) {
-                                "/topic/community" -> {
-                                    try {
-                                        val chat = singleChatAdapter.fromJson(jsonPayload)
-                                        chat?.let {
-                                            Log.d("WebSocket", "Parsed chat: $it")
-                                            viewModelScope.launch { _messageFlow.emit(it) }
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e("WebSocket", "Error parsing single chat message", e)
-                                    }
-                                }
-                                "/topic/community-history" -> {
-                                    try {
-                                        val history = chatListAdapter.fromJson(jsonPayload)
-                                        history?.let {
-                                            Log.d("WebSocket", "Parsed chat history: $it")
-                                            viewModelScope.launch {
-                                                _messageFlow.emitAll(it.asFlow())
-                                            }
-                                        }
-                                    } catch (e: Exception) {
-                                        Log.e("WebSocket", "Error parsing chat history", e)
-                                    }
-                                }
+                                "/topic/community" -> handleSingleChatMessage(jsonPayload)
+                                "/topic/community-history" -> handleChatHistoryMessage(jsonPayload)
                                 else -> Log.d("WebSocket", "Unhandled destination: $destination")
                             }
                         } else {
@@ -130,6 +108,32 @@ class WebSocketService(private val serverUrl: String) {
         } catch (e: Exception) {
             Log.e(TAG, "Failed to connect to WebSocket", e)
             throw e
+        }
+    }
+
+    private fun handleSingleChatMessage(jsonPayload: String) {
+        try {
+            val chat = singleChatAdapter.fromJson(jsonPayload)
+            chat?.let {
+                Log.d("WebSocket", "Parsed chat: $it")
+                viewModelScope.launch { _messageFlow.emit(it) }
+            }
+        } catch (e: Exception) {
+            Log.e("WebSocket", "Error parsing single chat message", e)
+        }
+    }
+
+    private fun handleChatHistoryMessage(jsonPayload: String) {
+        try {
+            val history = chatListAdapter.fromJson(jsonPayload)
+            history?.let { chatList ->
+                Log.d("WebSocket", "Parsed chat history: $chatList")
+                viewModelScope.launch {
+                    _messageFlow.emitAll(chatList.asFlow())
+                }
+            }
+        } catch (e: Exception) {
+            Log.e("WebSocket", "Error parsing chat history", e)
         }
     }
 

@@ -12,5 +12,22 @@ data class AppCommunity(
     val chatMessage: String,
     val chatAttachment: String? = null,
     val chatTimestamp: String? = null,
-    val useFlag: Boolean = true
+    val mediaList: List<Media> = emptyList(),
+    val useFlag: Boolean = true,
+): Serializable {
+    override fun equals(other: Any?): Boolean {
+        return other is AppCommunity && this.chatId == other.chatId
+    }
+
+    override fun hashCode(): Int {
+        return chatId.hashCode()
+    }
+}
+
+data class Media(
+    val mediaId: Long? = null,
+    val chatId: Long? = -1,
+    val mediaUrl: String? = null,
+    val mediaType: String? = null,
+    val uploadedAt: String? = null
 ): Serializable
