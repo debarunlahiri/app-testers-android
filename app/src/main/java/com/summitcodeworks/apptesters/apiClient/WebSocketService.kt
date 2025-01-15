@@ -166,13 +166,13 @@ class WebSocketService(private val serverUrl: String) {
         sendHistorySubscribeFrame()
     }
 
-    private suspend fun sendHistorySubscribeFrame() {
+    private suspend fun sendHistorySubscribeFrame(page: Int = 0, size: Int = 10) {
         try {
             connect()
             val subscribeFrame = buildString {
                 append("SUBSCRIBE\n")
                 append("id:sub-1\n")
-                append("destination:/topic/community-history\n")
+                append("destination:/topic/community-history?page=$page&size=$size\n")
                 append("\n")
                 append("\u0000")
             }
