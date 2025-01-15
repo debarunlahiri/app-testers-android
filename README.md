@@ -56,12 +56,12 @@ App Testers is a community-driven platform that connects developers with testers
     </td>
   </tr>
   <tr>
-    <td align="center" colspan="2">
+    <td align="center">
       <img src="Screenshots/Screenshot_1736901872.png" width="300"/><br/>
       <b>My & Tested Apps</b><br/>
       Track your submitted and tested apps
     </td>
-    <td align="center" colspan="2">
+    <td align="center">
       <img src="Screenshots/Screenshot_1736901884.png" width="300"/><br/>
       <b>Credits Screen</b><br/>
       Add credits by watching ad
